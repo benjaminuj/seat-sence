@@ -1,5 +1,7 @@
 <div align=center><h2>SEAT SENSE 🪑 </h2></div>
+
 ---
+
 ### 실시간 **좌석 현황 확인** 서비스, Seat Sense입니다!
 
 가게에 가기 전, 가게의 현재 좌석 이용 상황에 대해 궁금하지 않으셨나요?
@@ -28,7 +30,10 @@ Seat Sense 를 통해 **나만의 가게 좌석 배치도**를 직접 만들고,
 - [STACKS](#STACKS)
  
 ## DIRECTORY STRUCTURE
+
 ---
+
+<pre>
 ├── src
 │   ├── main
 │   │   ├── generated
@@ -304,7 +309,7 @@ Seat Sense 를 통해 **나만의 가게 좌석 배치도**를 직접 만들고,
 │   │       │   └── keystore.p12
 │   │       ├── static
 │   │       └── templates
-
+</pre>
 
 ## 💻STACKS
 ---
