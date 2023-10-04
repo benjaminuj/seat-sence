@@ -1,6 +1,6 @@
-<div align=center><h2>SEAT SENSE 🪑 </h2></div>
+<div align=center><h1>SEAT SENSE 🪑 </h1></div>
 
----
+- - -
 
 ### 실시간 **좌석 현황 확인** 서비스, Seat Sense입니다!
 
@@ -20,18 +20,18 @@
 
 Seat Sense 를 통해 **나만의 가게 좌석 배치도**를 직접 만들고, **기본적인 가게 관리**와 **좌석 이용 관리 및 예약 관리**를 한 서비스에서 손쉽게 관리해 보세요! 
 
-### 서비스 이용하기
+## 서비스 이용하기
 - 일반 사용자 : https://myuser.seat-sense.site/
 - 사장님 : https://admin.seat-sense.site/
 
-## INDEX
----
+# INDEX
+- - -
 - [DIRECTORY STRUCTURE](#DIRECTORY-STRUCTURE)
 - [STACKS](#STACKS)
  
-## DIRECTORY STRUCTURE
+# DIRECTORY STRUCTURE
 
----
+- - -
 
 <pre>
 ├── src
@@ -311,8 +311,8 @@ Seat Sense 를 통해 **나만의 가게 좌석 배치도**를 직접 만들고,
 │   │       └── templates
 </pre>
 
-## 💻STACKS
----
+# STACKS 💻
+- - -
 ### Development
 <div align=center> 
 <img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white"> 
@@ -333,5 +333,3 @@ Seat Sense 를 통해 **나만의 가게 좌석 배치도**를 직접 만들고,
 <div align=center> 
 <img src="https://img.shields.io/badge/amazonaws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white">
 </div>
-
-
