@@ -311,7 +311,7 @@ Seat Sense 를 통해 **나만의 가게 좌석 배치도**를 직접 만들고,
 │   │       └── templates
 </pre>
 
-# STACKS 💻
+# STACKS
 - - -
 ### Development
 <div align=center> 
