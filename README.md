@@ -26,35 +26,35 @@ password : admin3333@
 
 # Index
 
-- [How to build](#How-to-build)
+- [How to Use (BackEnd)](#How-to-Use-(BackEnd))
 - [Stacks](#Stacks)
  
 ---
 
-# How to Use Back-End
+# How to Use (BackEnd)
 
-### Requirements
+## Requirements 
 You require the following to build SEAT SENSE:
 - Latest stable Java 11
 - Latest stable Gradle
 
-### Installation
+## Installation 
 ```
 $ git clone https://github.com/benjaminuj/seat-sence.git
 $ cd seat-sense 
 ```
 
-### Build
+## Build 
 ```
 $ ./gradlew --exclude-task -test clean build
 ```
 
-### Run
+## Run 
 ```
 $ java -jar -Dspring.profiles.active=dev build/libs/seat-sence-0.0.1-SNAPSHOT.jar
 ```
 
-# Stacks
+# Stacks (BackEnd)
 
 ### Development
 <div align=center> 
