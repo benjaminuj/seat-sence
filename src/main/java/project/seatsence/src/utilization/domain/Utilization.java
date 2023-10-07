@@ -14,6 +14,7 @@ import project.seatsence.src.store.domain.ReservationUnit;
 import project.seatsence.src.store.domain.Store;
 import project.seatsence.src.store.domain.StoreChair;
 import project.seatsence.src.store.domain.StoreSpace;
+import project.seatsence.src.utilization.domain.Participation.Participation;
 import project.seatsence.src.utilization.domain.reservation.Reservation;
 import project.seatsence.src.utilization.domain.walkin.WalkIn;
 
@@ -51,6 +52,11 @@ public class Utilization extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
+
+    @Nullable
+    @OneToOne
+    @JoinColumn(name = "participation_id")
+    private Participation participation;
 
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'CHECK_IN'")

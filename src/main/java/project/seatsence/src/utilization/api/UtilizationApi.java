@@ -22,7 +22,7 @@ import project.seatsence.src.utilization.service.UtilizationService;
 @RequestMapping("/v1/utilization")
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "10. [Utilization]")
+@Tag(name = "11. [Utilization]")
 @Slf4j
 @Validated
 public class UtilizationApi {

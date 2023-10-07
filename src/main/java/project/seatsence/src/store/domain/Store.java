@@ -40,16 +40,19 @@ public class Store extends BaseEntity {
 
     @NotBlank private String storeName;
 
+    @Column(columnDefinition = "TEXT")
     private String introduction;
 
     private String address;
     private String detailAddress;
 
-    // TODO 대표 이미지 업로드 설정(필수값)
+    @Column(columnDefinition = "TEXT")
     private String images;
 
     @Enumerated(EnumType.STRING)
     private Category category;
+
+    private String telNum;
 
     private String dayOff;
     private String monOpenTime;
@@ -107,6 +110,7 @@ public class Store extends BaseEntity {
         this.detailAddress = request.getDetailAddress();
         this.category = EnumUtils.getEnumFromString(request.getCategory(), Category.class);
         this.introduction = request.getIntroduction();
+        this.telNum = request.getTelNum();
     }
 
     public void updateOperatingTime(StoreOperatingTimeRequest request) {

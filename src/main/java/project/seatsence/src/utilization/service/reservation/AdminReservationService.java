@@ -51,7 +51,7 @@ public class AdminReservationService {
 
     public Slice<Reservation> getPendingReservation(Long storeId, Pageable pageable) {
         Slice<Reservation> reservationPendingSlice =
-                findAllByStoreIdAndReservationStatusAndStateOrderByStartScheduleDesc(
+                findAllByStoreIdAndReservationStatusAndStateOrderByStartScheduleAsc(
                         storeId, PENDING, pageable);
         if (!reservationPendingSlice.hasContent()) {
             throw new BaseException(SUCCESS_NO_CONTENT);
@@ -59,16 +59,16 @@ public class AdminReservationService {
         return reservationPendingSlice;
     }
 
-    public Slice<Reservation> findAllByStoreIdAndReservationStatusAndStateOrderByStartScheduleDesc(
+    public Slice<Reservation> findAllByStoreIdAndReservationStatusAndStateOrderByStartScheduleAsc(
             Long storeId, ReservationStatus reservationStatus, Pageable pageable) {
         return reservationRepository
-                .findAllByStoreIdAndReservationStatusAndStateOrderByStartScheduleDesc(
+                .findAllByStoreIdAndReservationStatusAndStateOrderByStartScheduleAsc(
                         storeId, reservationStatus, ACTIVE, pageable);
     }
 
     public Slice<Reservation> getProcessedReservation(Long storeId, Pageable pageable) {
         Slice<Reservation> reservationProcessedSlice =
-                findAllByStoreIdAndReservationStatusNotAndStateOrderByStartScheduleDesc(
+                findAllByStoreIdAndReservationStatusNotAndStateOrderByUpdatedAtDesc(
                         storeId, PENDING, pageable);
 
         if (!reservationProcessedSlice.hasContent()) {
@@ -77,11 +77,10 @@ public class AdminReservationService {
         return reservationProcessedSlice;
     }
 
-    public Slice<Reservation>
-            findAllByStoreIdAndReservationStatusNotAndStateOrderByStartScheduleDesc(
-                    Long storeId, ReservationStatus reservationStatus, Pageable pageable) {
+    public Slice<Reservation> findAllByStoreIdAndReservationStatusNotAndStateOrderByUpdatedAtDesc(
+            Long storeId, ReservationStatus reservationStatus, Pageable pageable) {
         return reservationRepository
-                .findAllByStoreIdAndReservationStatusNotAndStateOrderByStartScheduleDesc(
+                .findAllByStoreIdAndReservationStatusNotAndStateOrderByUpdatedAtDesc(
                         storeId, reservationStatus, ACTIVE, pageable);
     }
 

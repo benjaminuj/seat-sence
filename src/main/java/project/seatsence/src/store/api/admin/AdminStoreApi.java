@@ -3,12 +3,14 @@ package project.seatsence.src.store.api.admin;
 import static project.seatsence.global.constants.Constants.*;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,9 +42,15 @@ public class AdminStoreApi {
     @GetMapping("/owned")
     public StoreOwnedStoreResponse getOwnedStore(
             @RequestHeader(AUTHORIZATION_HEADER) String accessToken,
-            @CookieValue(COOKIE_NAME_PREFIX_SECURE + REFRESH_TOKEN_NAME) String refreshToken) {
+            @CookieValue(COOKIE_NAME_PREFIX_SECURE + REFRESH_TOKEN_NAME) String refreshToken,
+            @Parameter(
+                            description =
+                                    "page - 1부터 시작, size - 한 페이지에 담을 데이터 수(default 10), sort - 정렬 조건, 순서대로 적용(여기서는 id로 넣으시면 됩니다!)",
+                            name = "pageable",
+                            required = true)
+                    Pageable pageable) {
         String userEmail = JwtProvider.getUserEmailFromValidToken(accessToken, refreshToken);
-        return storeService.findAllOwnedStore(userEmail);
+        return storeService.findAllOwnedStore(userEmail, pageable);
     }
 
     @Operation(summary = "admin 가게 기본 정보 가져오기")
@@ -61,12 +69,13 @@ public class AdminStoreApi {
             @RequestParam("detailAddress") String detailAddress,
             @RequestParam("category") String category,
             @RequestParam("introduction") String introduction,
-            @RequestParam("originImages") List<String> originImages,
+            @RequestParam(value = "telNum", required = false) String telNum,
+            @RequestParam(value = "originImages", required = false) List<String> originImages,
             @RequestParam(value = "file", required = false) List<MultipartFile> files)
             throws IOException {
         StoreBasicInformationRequest request =
                 StoreBasicInformationRequest.createAdminStoreBasicInformationRequest(
-                        storeName, address, detailAddress, category, introduction);
+                        storeName, address, detailAddress, category, introduction, telNum);
         storeService.updateBasicInformation(request, storeId, originImages, files);
     }
 

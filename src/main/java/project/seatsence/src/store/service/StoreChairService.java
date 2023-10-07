@@ -6,6 +6,7 @@ import static project.seatsence.global.entity.BaseTimeAndStateEntity.State.*;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import project.seatsence.global.exceptions.BaseException;
 import project.seatsence.src.store.dao.StoreChairRepository;
 import project.seatsence.src.store.domain.Store;
@@ -34,5 +35,10 @@ public class StoreChairService {
 
     public List<StoreChair> findAllByStoreAndState(Store store) {
         return storeChairRepository.findAllByStoreAndState(store, ACTIVE);
+    }
+
+    @Transactional
+    public void deleteAll(List<StoreChair> storeChairList) {
+        storeChairRepository.deleteAll(storeChairList);
     }
 }

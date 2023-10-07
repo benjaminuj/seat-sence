@@ -62,6 +62,7 @@ public class UserStoreApi {
                                                                 storeService.getStoreMainImage(
                                                                         store.getId()))
                                                         .isOpen(storeService.isOpenNow(store))
+                                                        .telNum(store.getTelNum())
                                                         .build())
                                 .collect(Collectors.toList()))
                 .build();
@@ -106,6 +107,7 @@ public class UserStoreApi {
                                                                 storeService.getStoreMainImage(
                                                                         store.getId()))
                                                         .isOpen(storeService.isOpenNow(store))
+                                                        .telNum(store.getTelNum())
                                                         .build())
                                 .collect(Collectors.toList()))
                 .build();

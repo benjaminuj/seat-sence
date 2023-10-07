@@ -5,6 +5,7 @@ import static project.seatsence.global.entity.BaseTimeAndStateEntity.State.ACTIV
 import static project.seatsence.src.store.domain.ReservationUnit.*;
 import static project.seatsence.src.utilization.domain.UtilizationStatus.*;
 
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import project.seatsence.src.store.domain.Store;
 import project.seatsence.src.utilization.dao.UtilizationRepository;
 import project.seatsence.src.utilization.domain.Utilization;
 import project.seatsence.src.utilization.domain.UtilizationStatus;
+import project.seatsence.src.utilization.domain.reservation.Reservation;
 import project.seatsence.src.utilization.dto.response.LoadSeatsCurrentlyInUseResponse;
 
 @Service
@@ -108,5 +110,18 @@ public class UtilizationService {
             Store store, UtilizationStatus utilizationStatus) {
         return utilizationRepository.findAllByStoreAndUtilizationStatusAndState(
                 store, utilizationStatus, ACTIVE);
+    }
+
+    public Utilization findAllByReservationAndState(Reservation reservation) {
+        return utilizationRepository.findAllByReservationAndState(reservation, ACTIVE);
+    }
+
+    public LocalDateTime setLimitTimeToGetAllReservationsOfThatDay(LocalDateTime thatDay) {
+        LocalDateTime limit = thatDay.plusDays(1).toLocalDate().atTime(00, 00, 00);
+        return limit;
+    }
+
+    public Utilization findByWalkInIdAndState(Long walkInId) {
+        return utilizationRepository.findByWalkInIdAndState(walkInId, ACTIVE);
     }
 }

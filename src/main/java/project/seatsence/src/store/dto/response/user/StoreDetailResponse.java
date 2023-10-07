@@ -22,7 +22,7 @@ public class StoreDetailResponse {
 
     private Category category;
     private String mainImage; // TODO 메인 이미지 및 이미지 리스트 전송
-
+    private String telNum;
     private String monOpenTime;
     private String monCloseTime;
     private String tueOpenTime;

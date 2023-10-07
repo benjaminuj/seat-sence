@@ -9,13 +9,15 @@ public class StoreBasicInformationRequest {
     private String detailAddress;
     private String category;
     private String introduction;
+    private String telNum;
 
     public static StoreBasicInformationRequest createAdminStoreBasicInformationRequest(
             String storeName,
             String address,
             String detailAddress,
             String category,
-            String introduction) {
+            String introduction,
+            String telNum) {
         StoreBasicInformationRequest storeBasicInformationRequest =
                 new StoreBasicInformationRequest();
         storeBasicInformationRequest.storeName = storeName;
@@ -23,6 +25,7 @@ public class StoreBasicInformationRequest {
         storeBasicInformationRequest.detailAddress = detailAddress;
         storeBasicInformationRequest.category = category;
         storeBasicInformationRequest.introduction = introduction;
+        storeBasicInformationRequest.telNum = telNum;
         return storeBasicInformationRequest;
     }
 }

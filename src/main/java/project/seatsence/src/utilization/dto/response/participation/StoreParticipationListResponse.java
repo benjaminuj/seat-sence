@@ -9,20 +9,19 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class ParticipationListResponse {
-    private List<ParticipationResponse> ParticipationResponseList;
+public class StoreParticipationListResponse {
+
+    private List<SpaceResponse> spaceResponseList;
 
     @Getter
     @AllArgsConstructor
     @Builder
-    public static class ParticipationResponse {
+    public static class SpaceResponse {
         private Long id;
-        private String storeName;
+        private String utilizationUnit; // 예약 또는 바로 사용
         private String storeSpaceName;
         private LocalDateTime startSchedule;
         private LocalDateTime endSchedule;
-        private LocalDateTime createdAt;
-        private String storeMainImage;
         private String userNickname;
     }
 }

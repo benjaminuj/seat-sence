@@ -151,22 +151,16 @@ public class StoreSpaceService {
                 storeSpaceRepository
                         .findByIdAndState(storeSpaceId, ACTIVE)
                         .orElseThrow(() -> new BaseException(STORE_SPACE_NOT_FOUND));
-        storeTableService
-                .findAllByStoreSpaceAndState(storeSpace)
-                .forEach(
-                        storeTable -> {
-                            storeTable.setState(INACTIVE);
-                        }); // 기존에 등록되어있던 테이블 전체 삭제
-        storeChairService
-                .findAllByStoreSpaceAndState(storeSpace)
-                .forEach(
-                        storeChair -> {
-                            storeChair.setState(INACTIVE);
-                        }); // 기존에 등록되어 있던 의자 전체 삭제
+
+        List<StoreTable> storeTableList = storeTableService.findAllByStoreSpaceAndState(storeSpace);
+        storeTableService.deleteAll(storeTableList); // 기존에 등록되어있던 테이블 전체 삭제
+
+        List<StoreChair> storeChairList = storeChairService.findAllByStoreSpaceAndState(storeSpace);
+        storeChairService.deleteAll(storeChairList); // 기존에 등록되어있던 의자 전체 삭제
         storeSpace.updateBasicInformation(storeSpaceUpdateRequest); // 이름, 예약 단위, 높이 변경
 
         // 테이블 및 좌석 새로 등록
-        List<StoreTable> storeTableList = new ArrayList<>();
+        List<StoreTable> newStoreTableList = new ArrayList<>();
         List<StoreSpaceTableRequest> tableList = storeSpaceUpdateRequest.getTableList();
 
         for (StoreSpaceTableRequest tableRequest : tableList) {
@@ -180,12 +174,12 @@ public class StoreSpaceService {
                             .store(storeSpace.getStore())
                             .idByWeb(tableRequest.getIdByWeb())
                             .build();
-            storeTableList.add(storeTable);
+            newStoreTableList.add(storeTable);
         }
-        storeSpace.getStoreTableList().addAll(storeTableList); // storeSpace에 테이블 추가
-        storeTableService.saveAll(storeTableList);
+        storeSpace.getStoreTableList().addAll(newStoreTableList); // store space에 테이블 추가
+        storeTableService.saveAll(newStoreTableList);
 
-        List<StoreChair> storeChairList = new ArrayList<>();
+        List<StoreChair> newStoreChairList = new ArrayList<>();
         List<StoreSpaceChairRequest> chairList = storeSpaceUpdateRequest.getChairList();
 
         for (StoreSpaceChairRequest chairRequest : chairList) {
@@ -198,10 +192,10 @@ public class StoreSpaceService {
                             .idByWeb(chairRequest.getIdByWeb())
                             .manageId(chairRequest.getManageId())
                             .build();
-            storeChairList.add(storeChair);
+            newStoreChairList.add(storeChair);
         }
-        storeSpace.getStoreChairList().addAll(storeChairList); // storeSpace에 의자 추가
-        storeChairService.saveAll(storeChairList);
+        storeSpace.getStoreChairList().addAll(newStoreChairList); // store space에 의자 추가
+        storeChairService.saveAll(newStoreChairList);
     }
 
     public Boolean reservationUnitIsOnlySeat(StoreSpace storeSpace) {

@@ -13,4 +13,6 @@ public interface UtilizationRepositoryCustom {
             UtilizationStatus utilizationStatus1,
             UtilizationStatus utilizationStatus2,
             BaseTimeAndStateEntity.State state);
+
+    public Utilization findByWalkInIdAndState(Long walkInId, BaseTimeAndStateEntity.State state);
 }

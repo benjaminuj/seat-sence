@@ -28,5 +28,6 @@ public class StoreListResponse {
         private String detailAddress;
         private String mainImage;
         private Boolean isOpen;
+        private String telNum;
     }
 }

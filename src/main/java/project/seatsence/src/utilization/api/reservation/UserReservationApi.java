@@ -33,7 +33,7 @@ import project.seatsence.src.utilization.domain.reservation.Reservation;
 import project.seatsence.src.utilization.domain.reservation.ReservationStatus;
 import project.seatsence.src.utilization.dto.request.ChairUtilizationRequest;
 import project.seatsence.src.utilization.dto.request.SpaceUtilizationRequest;
-import project.seatsence.src.utilization.dto.response.reservation.AllReservationsForSeatAndDateResponse;
+import project.seatsence.src.utilization.dto.response.AllUtilizationsForSeatAndDateResponse;
 import project.seatsence.src.utilization.dto.response.reservation.UserReservationListResponse;
 import project.seatsence.src.utilization.service.UserUtilizationService;
 import project.seatsence.src.utilization.service.reservation.ReservationService;
@@ -229,7 +229,7 @@ public class UserReservationApi {
             summary = "특정 의자와 날짜에 대한 모든 예약 조회",
             description = "선택한 의자와 날짜에 예약 되어있는(대기or승인) 모든 예약 내역을 조회합니다.")
     @GetMapping("/reserved-list/chair/date/{chair-id-to-reservation}")
-    public AllReservationsForSeatAndDateResponse getAllReservationsForChairAndDate(
+    public AllUtilizationsForSeatAndDateResponse getAllReservationsForChairAndDate(
             @Parameter(
                             description = "이용하려는 의자의 식별자",
                             required = true,
@@ -247,44 +247,12 @@ public class UserReservationApi {
                     @RequestParam("reservation-date-and-time")
                     LocalDateTime reservationDateAndTime) {
 
-        List<AllReservationsForSeatAndDateResponse.ReservationForSeatAndDate> mappedReservations =
+        List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate> mappedReservations =
                 userReservationService.getAllReservationsForChairAndDate(
                         chairIdToReservation, reservationDateAndTime);
 
-        AllReservationsForSeatAndDateResponse response =
-                new AllReservationsForSeatAndDateResponse(mappedReservations);
-
-        return response;
-    }
-
-    @Operation(
-            summary = "특정 스페이스와 날짜에 대한 모든 예약 조회",
-            description = "선택한 스페이스와 날짜에 예약 되어있는(대기or승인) 모든 예약 내역을 조회합니다.")
-    @GetMapping("/reserved-list/space/date/{space-id-to-reservation}")
-    public AllReservationsForSeatAndDateResponse getAllReservationsForSpaceAndDate(
-            @Parameter(
-                            description = "이용하려는 스페이스의 식별자",
-                            required = true,
-                            in = ParameterIn.PATH,
-                            example = "10")
-                    @PathVariable("space-id-to-reservation")
-                    Long spaceIdToReservation,
-            @Parameter(
-                            description =
-                                    "이용(예약 or 바로 사용)하려는 시간과 날짜 / 당일이면 시간은 현재시간으로, 다른 날이면 해당 날의 00시00분00초로 요청",
-                            required = true,
-                            in = ParameterIn.QUERY,
-                            example = "2023-08-07T10:30:00.000")
-                    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-                    @RequestParam("reservation-date-and-time")
-                    LocalDateTime reservationDateAndTime) {
-
-        List<AllReservationsForSeatAndDateResponse.ReservationForSeatAndDate> mappedReservations =
-                userReservationService.getAllReservationsForSpaceAndDate(
-                        spaceIdToReservation, reservationDateAndTime);
-
-        AllReservationsForSeatAndDateResponse response =
-                new AllReservationsForSeatAndDateResponse(mappedReservations);
+        AllUtilizationsForSeatAndDateResponse response =
+                new AllUtilizationsForSeatAndDateResponse(mappedReservations);
 
         return response;
     }

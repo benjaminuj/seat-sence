@@ -3,23 +3,27 @@ package project.seatsence.src.utilization.service;
 import static project.seatsence.global.code.ResponseCode.INVALID_RESERVATION_UNIT;
 import static project.seatsence.global.code.ResponseCode.INVALID_UTILIZATION_TIME;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.seatsence.global.exceptions.BaseException;
 import project.seatsence.src.store.domain.StoreChair;
 import project.seatsence.src.store.domain.StoreSpace;
-import project.seatsence.src.store.service.StoreChairService;
 import project.seatsence.src.store.service.StoreSpaceService;
+import project.seatsence.src.utilization.dto.response.AllUtilizationsForSeatAndDateResponse;
+import project.seatsence.src.utilization.service.reservation.UserReservationService;
+import project.seatsence.src.utilization.service.walkin.WalkInService;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserUtilizationService {
-    private final StoreChairService storeChairService;
     private final StoreSpaceService storeSpaceService;
-
+    private final UserReservationService userReservationService;
+    private final WalkInService walkInService;
     /**
      * 이용 시작일과 종료일이 같은날인지 체크
      *
@@ -126,5 +130,24 @@ public class UserUtilizationService {
         if (!isStartScheduleIsBeforeEndSchedule(startSchedule, endSchedule)) {
             throw new BaseException(INVALID_UTILIZATION_TIME);
         }
+    }
+
+    public List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate>
+            getAllUtilizationsForSpaceAndDate(Long spaceId, LocalDateTime standardTime) {
+        LocalDate now = LocalDate.now();
+
+        // 예약
+        List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate> list =
+                userReservationService.getAllReservationsForSpaceAndDate(spaceId, standardTime);
+
+        if (now.isEqual(standardTime.toLocalDate())) {
+            // 바로사용
+            AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate walkIn =
+                    walkInService.getAllWalkInForSpaceAndDate(spaceId, standardTime);
+            if (walkIn != null) {
+                list.add(0, walkIn);
+            }
+        }
+        return list;
     }
 }

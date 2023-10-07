@@ -30,13 +30,16 @@ import project.seatsence.src.user.service.UserService;
 import project.seatsence.src.utilization.dao.CustomUtilizationContentRepository;
 import project.seatsence.src.utilization.dao.reservation.ReservationRepository;
 import project.seatsence.src.utilization.domain.CustomUtilizationContent;
+import project.seatsence.src.utilization.domain.Utilization;
+import project.seatsence.src.utilization.domain.UtilizationStatus;
 import project.seatsence.src.utilization.domain.reservation.Reservation;
 import project.seatsence.src.utilization.domain.reservation.ReservationStatus;
 import project.seatsence.src.utilization.dto.request.ChairUtilizationRequest;
 import project.seatsence.src.utilization.dto.request.CustomUtilizationContentRequest;
 import project.seatsence.src.utilization.dto.request.SpaceUtilizationRequest;
-import project.seatsence.src.utilization.dto.response.reservation.AllReservationsForSeatAndDateResponse;
+import project.seatsence.src.utilization.dto.response.AllUtilizationsForSeatAndDateResponse;
 import project.seatsence.src.utilization.dto.response.reservation.UserReservationListResponse;
+import project.seatsence.src.utilization.service.UtilizationService;
 
 @Service
 @Transactional
@@ -51,6 +54,7 @@ public class UserReservationService {
     private final StoreCustomService storeCustomService;
     private final CustomUtilizationContentRepository customUtilizationContentRepository;
     private final StoreService storeService;
+    private final UtilizationService utilizationService;
 
     private static Comparator<Reservation> startScheduleComparator =
             new Comparator<Reservation>() {
@@ -204,13 +208,15 @@ public class UserReservationService {
         reservation.cancelReservation();
     }
 
-    public List<AllReservationsForSeatAndDateResponse.ReservationForSeatAndDate>
+    public List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate>
             getAllReservationsForChairAndDate(
                     Long chairIdToReservation, LocalDateTime reservationDateAndTime) {
 
         StoreChair storeChair = storeChairService.findByIdAndState(chairIdToReservation);
 
-        LocalDateTime limit = setLimitTimeToGetAllReservationsOfThatDay(reservationDateAndTime);
+        LocalDateTime limit =
+                utilizationService.setLimitTimeToGetAllReservationsOfThatDay(
+                        reservationDateAndTime);
 
         List<ReservationStatus> reservationStatuses =
                 setPossibleReservationStatusToCancelReservation();
@@ -219,32 +225,32 @@ public class UserReservationService {
                 findAllByReservedStoreChairAndReservationStatusInAndEndScheduleIsAfterAndEndScheduleIsBeforeAndState(
                         storeChair, reservationStatuses, reservationDateAndTime, limit);
 
-        List<AllReservationsForSeatAndDateResponse.ReservationForSeatAndDate> mappedReservations =
+        List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate> mappedReservations =
                 reservations.stream()
                         .map(
                                 reservation ->
-                                        AllReservationsForSeatAndDateResponse
-                                                .ReservationForSeatAndDate.from(reservation))
+                                        AllUtilizationsForSeatAndDateResponse
+                                                .UtilizationForSeatAndDate.from(reservation))
                         .collect(Collectors.toList());
 
         return mappedReservations;
     }
 
     // Todo : perform improvement Refactor - loop
-    public List<AllReservationsForSeatAndDateResponse.ReservationForSeatAndDate>
-            getAllReservationsForSpaceAndDate(
-                    Long spaceIdToReservation, LocalDateTime reservationDateAndTime) {
+    public List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate>
+            getAllReservationsForSpaceAndDate(Long spaceId, LocalDateTime standardTime) {
         List<Reservation> reservationList = new ArrayList<>();
 
-        StoreSpace storeSpace = storeSpaceService.findByIdAndState(spaceIdToReservation);
+        StoreSpace storeSpace = storeSpaceService.findByIdAndState(spaceId);
 
-        LocalDateTime limit = setLimitTimeToGetAllReservationsOfThatDay(reservationDateAndTime);
+        LocalDateTime limit =
+                utilizationService.setLimitTimeToGetAllReservationsOfThatDay(standardTime);
         List<ReservationStatus> reservationStatuses =
                 setPossibleReservationStatusToCancelReservation();
 
         List<Reservation> reservationsBySpace =
                 findAllByReservedStoreSpaceAndReservationStatusInAndEndScheduleIsAfterAndEndScheduleIsBeforeAndState(
-                        storeSpace, reservationStatuses, reservationDateAndTime, limit);
+                        storeSpace, reservationStatuses, standardTime, limit);
 
         reservationList = reservationsBySpace;
 
@@ -253,29 +259,34 @@ public class UserReservationService {
         for (StoreChair storeChair : storeChairList) {
             List<Reservation> reservationsByChairInSpace =
                     findAllByReservedStoreChairAndReservationStatusInAndEndScheduleIsAfterAndEndScheduleIsBeforeAndState(
-                            storeChair, reservationStatuses, reservationDateAndTime, limit);
+                            storeChair, reservationStatuses, standardTime, limit);
 
             for (Reservation reservation : reservationsByChairInSpace) {
                 reservationList.add(reservation);
             }
         }
 
+        for (int i = 0; i < reservationList.size(); i++) {
+            Reservation reservation = reservationList.get(i);
+            Utilization utilizationFound =
+                    utilizationService.findAllByReservationAndState(reservation);
+            if (utilizationFound == null) continue;
+            if (utilizationFound.getUtilizationStatus() != UtilizationStatus.CHECK_IN) {
+                reservationList.remove(reservation);
+            }
+        }
+
         Collections.sort(reservationList, startScheduleComparator);
 
-        List<AllReservationsForSeatAndDateResponse.ReservationForSeatAndDate> mappedReservations =
+        List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate> mappedReservations =
                 reservationList.stream()
                         .map(
                                 reservation ->
-                                        AllReservationsForSeatAndDateResponse
-                                                .ReservationForSeatAndDate.from(reservation))
+                                        AllUtilizationsForSeatAndDateResponse
+                                                .UtilizationForSeatAndDate.from(reservation))
                         .collect(Collectors.toList());
 
         return mappedReservations;
-    }
-
-    public LocalDateTime setLimitTimeToGetAllReservationsOfThatDay(LocalDateTime thatDay) {
-        LocalDateTime limit = thatDay.plusDays(1).toLocalDate().atTime(00, 00, 00);
-        return limit;
     }
 
     public List<ReservationStatus> setPossibleReservationStatusToCancelReservation() {
@@ -342,5 +353,13 @@ public class UserReservationService {
                             user, customUtilizationField, reservation, null, content);
             customUtilizationContentRepository.save(newCustomUtilizationContent);
         }
+    }
+
+    public List<Reservation>
+            findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
+                    Long storeId) {
+        return reservationRepository
+                .findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
+                        storeId, APPROVED, LocalDateTime.now(), ACTIVE);
     }
 }

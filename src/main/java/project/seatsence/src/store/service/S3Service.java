@@ -26,27 +26,32 @@ public class S3Service {
     public List<String> upload(List<MultipartFile> files, String dirName, Long storeId)
             throws IOException {
         List<String> imagePathList = new ArrayList<>();
-        for (MultipartFile file : files) {
-            String originalName = file.getOriginalFilename(); // 파일 이름
-            assert originalName != null;
-            String extension = originalName.split("\\.")[1]; // 파일 확장자
-            String fileName = storeId + "_" + StringUtils.makeRandomString() + "." + extension;
-            String filePath = dirName + "/" + fileName;
-            long size = file.getSize(); // 파일 크기
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
+                String originalName = file.getOriginalFilename(); // 파일 이름
+                assert originalName != null;
+                String extension = originalName.split("\\.")[1]; // 파일 확장자
+                String fileName = storeId + "_" + StringUtils.makeRandomString() + "." + extension;
+                String filePath = dirName + "/" + fileName;
+                long size = file.getSize(); // 파일 크기
 
-            ObjectMetadata objectMetaData = new ObjectMetadata();
-            objectMetaData.setContentType(file.getContentType());
-            objectMetaData.setContentLength(size);
+                ObjectMetadata objectMetaData = new ObjectMetadata();
+                objectMetaData.setContentType(file.getContentType());
+                objectMetaData.setContentLength(size);
 
-            // S3에 업로드
-            amazonS3Client.putObject(
-                    new PutObjectRequest(bucket, filePath, file.getInputStream(), objectMetaData)
-                            .withCannedAcl(CannedAccessControlList.PublicRead));
+                // S3에 업로드
+                amazonS3Client.putObject(
+                        new PutObjectRequest(
+                                        bucket, filePath, file.getInputStream(), objectMetaData)
+                                .withCannedAcl(CannedAccessControlList.PublicRead));
 
-            String imagePath = amazonS3Client.getUrl(bucket, filePath).toString(); // 접근가능한 URL 가져오기
-            imagePathList.add(imagePath);
+                String imagePath =
+                        amazonS3Client.getUrl(bucket, filePath).toString(); // 접근가능한 URL 가져오기
+                imagePathList.add(imagePath);
+            }
+            return imagePathList;
         }
-        return imagePathList;
+        return null;
     }
 
     public void deleteOriginImages(Long storeId) {

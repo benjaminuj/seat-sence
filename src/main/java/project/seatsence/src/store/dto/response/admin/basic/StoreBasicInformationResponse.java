@@ -16,9 +16,9 @@ public class StoreBasicInformationResponse {
     private String address;
     private String detailAddress;
     private String category;
-    //    private String mainImage; // TODO 메인 이미지 및 이미지 리스트 전송
     private List<String> storeImages;
     private String introduction;
+    private String telNum;
 
     public static StoreBasicInformationResponse of(Store store, List<String> storeImages) {
         return StoreBasicInformationResponse.builder()
@@ -28,6 +28,7 @@ public class StoreBasicInformationResponse {
                 .category(store.getCategory() == null ? null : store.getCategory().getValue())
                 .storeImages(storeImages)
                 .introduction(store.getIntroduction())
+                .telNum(store.getTelNum())
                 .build();
     }
 }

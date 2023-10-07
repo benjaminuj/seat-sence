@@ -5,7 +5,6 @@ import static project.seatsence.global.entity.BaseTimeAndStateEntity.State.ACTIV
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,9 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import project.seatsence.global.config.security.JwtProvider;
 import project.seatsence.global.exceptions.BaseException;
 import project.seatsence.global.utils.CookieUtils;
-import project.seatsence.src.admin.dao.AdminInfoRepository;
 import project.seatsence.src.admin.dao.AdminRepository;
-import project.seatsence.src.admin.domain.AdminInfo;
 import project.seatsence.src.admin.dto.request.AdminSignInRequest;
 import project.seatsence.src.admin.dto.request.AdminSignUpRequest;
 import project.seatsence.src.store.dao.StoreMemberRepository;
@@ -34,7 +31,6 @@ import project.seatsence.src.user.service.UserService;
 public class AdminService {
 
     private final AdminRepository adminRepository;
-    private final AdminInfoRepository adminInfoRepository;
     private final PasswordEncoder passwordEncoder;
     private final StoreMemberRepository storeMemberRepository;
     private final UserService userService;
@@ -60,16 +56,6 @@ public class AdminService {
         return adminRepository
                 .findByIdAndState(userId, ACTIVE)
                 .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
-    }
-
-    public AdminInfo findAdminInfoById(Long adminInfoId) {
-        return adminInfoRepository
-                .findById(adminInfoId)
-                .orElseThrow(() -> new BaseException(ADMIN_INFO_NOT_FOUND));
-    }
-
-    public List<AdminInfo> findAllByUserId(Long userId) {
-        return adminInfoRepository.findAllByUserId(userId);
     }
 
     public User findByEmail(String email) {

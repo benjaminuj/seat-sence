@@ -7,6 +7,7 @@ import static project.seatsence.global.entity.BaseTimeAndStateEntity.State.ACTIV
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -46,7 +47,6 @@ public class UserWalkInService {
     private final StoreService storeService;
     private final StoreCustomService storeCustomService;
     private final CustomUtilizationContentRepository customUtilizationContentRepository;
-
     private final WalkInRepository walkInRepository;
 
     /**
@@ -252,5 +252,12 @@ public class UserWalkInService {
                 .storeMainImage(storeService.getStoreMainImage(walkIn.getStore().getId()))
                 .userNickname(walkIn.getUser().getNickname())
                 .build();
+    }
+
+    public List<WalkIn> findByStoreIdAndEndScheduleAfterAndUsedStoreSpaceIdIsNotNullAndState(
+            Long storeId) {
+        return walkInRepository
+                .findByStoreIdAndEndScheduleAfterAndUsedStoreSpaceIdIsNotNullAndState(
+                        storeId, LocalDateTime.now(), ACTIVE);
     }
 }

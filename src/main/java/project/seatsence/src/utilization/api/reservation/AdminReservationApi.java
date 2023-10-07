@@ -39,7 +39,7 @@ public class AdminReservationApi {
         adminReservationService.reservationReject(reservationId);
     }
 
-    @Operation(summary = "admin 예약 전체 리스트")
+    @Operation(summary = "admin 예약 전체 리스트", description = "정렬 기준: 예약시작일자 내림차순")
     @GetMapping("/{store-id}/all-list")
     public SliceResponse<AdminReservationListResponse.ReservationResponse> entireReservationList(
             @PathVariable("store-id") Long storeId,
@@ -54,7 +54,7 @@ public class AdminReservationApi {
         return sliceResponse;
     }
 
-    @Operation(summary = "admin 예약 대기 리스트")
+    @Operation(summary = "admin 예약 대기 리스트", description = "정렬 기준: 예약시작일자 오름차순")
     @GetMapping("/{store-id}/pending-list")
     public SliceResponse<AdminReservationListResponse.ReservationResponse> pendingReservationList(
             @PathVariable("store-id") Long storeId,
@@ -69,7 +69,7 @@ public class AdminReservationApi {
         return sliceResponse;
     }
 
-    @Operation(summary = "admin 예약 처리 완료 리스트")
+    @Operation(summary = "admin 예약 처리 완료 리스트", description = "정렬 기준: 업데이트시간 내림차순")
     @GetMapping("/{store-id}/processed-list")
     public SliceResponse<AdminReservationListResponse.ReservationResponse> processedReservationList(
             @PathVariable("store-id") Long storeId,

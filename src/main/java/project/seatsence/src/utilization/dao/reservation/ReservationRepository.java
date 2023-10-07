@@ -45,13 +45,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                     LocalDateTime limit,
                     State state);
 
+    List<Reservation>
+            findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
+                    Long storeId,
+                    ReservationStatus reservationStatus,
+                    LocalDateTime endSchedule,
+                    State state);
+
     /** Admin Reservation */
     Slice<Reservation> findAllByStoreIdAndStateOrderByStartScheduleDesc(
             Long storeId, State state, Pageable pageable);
 
-    Slice<Reservation> findAllByStoreIdAndReservationStatusAndStateOrderByStartScheduleDesc(
+    Slice<Reservation> findAllByStoreIdAndReservationStatusAndStateOrderByStartScheduleAsc(
             Long storeId, ReservationStatus reservationStatus, State state, Pageable pageable);
 
-    Slice<Reservation> findAllByStoreIdAndReservationStatusNotAndStateOrderByStartScheduleDesc(
+    Slice<Reservation> findAllByStoreIdAndReservationStatusNotAndStateOrderByUpdatedAtDesc(
             Long storeId, ReservationStatus reservationStatus, State state, Pageable pageable);
 }

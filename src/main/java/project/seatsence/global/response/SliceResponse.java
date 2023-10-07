@@ -22,4 +22,8 @@ public final class SliceResponse<T> {
                 slice.getNumberOfElements(),
                 slice.hasNext());
     }
+
+    public static <T> SliceResponse<T> of(List<T> content, Long page, int size, boolean hasNext) {
+        return new SliceResponse<>(content, page + 1, size, hasNext);
+    }
 }

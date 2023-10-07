@@ -58,28 +58,39 @@ public class StoreService {
 
     private static final String STORE_IMAGE_S3_PATH = "store-images";
 
-    public StoreOwnedStoreResponse findAllOwnedStore(String userEmail) {
-        User user = userService.findByEmailAndState(userEmail);
-        List<StoreMember> storeMemberList =
-                storeMemberRepository.findAllByUserAndState(user, ACTIVE);
-        List<Long> storeIds =
-                storeMemberList.stream()
-                        .map(storeMember -> storeMember.getStore().getId())
-                        .collect(Collectors.toList());
-        List<Store> storeList = storeRepository.findAllByIdInAndState(storeIds, ACTIVE);
-        List<StoreOwnedStoreResponse.StoreResponse> storeResponseList =
-                storeList.stream()
-                        .map(
-                                store ->
-                                        new StoreOwnedStoreResponse.StoreResponse(
-                                                store.getId(),
-                                                store.getStoreName(),
-                                                store.getIntroduction(),
-                                                getStoreMainImage(store.getId()),
-                                                isOpenNow(store),
-                                                store.isClosedToday()))
-                        .collect(Collectors.toList());
-        return new StoreOwnedStoreResponse(storeResponseList);
+    public StoreOwnedStoreResponse findAllOwnedStore(String userEmail, Pageable pageable) {
+        try {
+            for (Sort.Order order : pageable.getSort()) {
+                String sortField = order.getProperty();
+                Store.class.getDeclaredField(sortField);
+            } // 올바른 정렬조건이 들어왔는지 확인
+            User user = userService.findByEmailAndState(userEmail);
+            List<StoreMember> storeMemberList =
+                    storeMemberRepository.findAllByUserAndState(user, ACTIVE, pageable);
+            List<Long> storeIds =
+                    storeMemberList.stream()
+                            .map(storeMember -> storeMember.getStore().getId())
+                            .collect(Collectors.toList()); // 유저가 보유한 스토어를 페이징하여 가져옴
+            List<Store> storeList =
+                    storeRepository.findAllByIdInAndState(
+                            storeIds,
+                            ACTIVE); // 각 스토어 아이디에 해당하는 스토어 정보(이미 페이징된 정보로 가져오는거라 추가 페이징 필요 없음)
+            List<StoreOwnedStoreResponse.StoreResponse> storeResponseList =
+                    storeList.stream()
+                            .map(
+                                    store ->
+                                            new StoreOwnedStoreResponse.StoreResponse(
+                                                    store.getId(),
+                                                    store.getStoreName(),
+                                                    store.getIntroduction(),
+                                                    getStoreMainImage(store.getId()),
+                                                    isOpenNow(store),
+                                                    store.isClosedToday()))
+                            .collect(Collectors.toList());
+            return new StoreOwnedStoreResponse(storeResponseList);
+        } catch (NoSuchFieldException e) {
+            throw new BaseException(STORE_SORT_FIELD_NOT_FOUND);
+        }
     }
 
     @Transactional
@@ -111,7 +122,9 @@ public class StoreService {
         }
         List<String> uploads =
                 s3Service.upload(files, STORE_IMAGE_S3_PATH, store.getId()); // 새로 추가된 이미지들 업로드
-        originImages.addAll(uploads); // 기존에 가지고 있던 이미지들 + 새로 추가된 이미지들
+        if (uploads != null) {
+            originImages.addAll(uploads); // 기존에 가지고 있던 이미지들 + 새로 추가된 이미지들
+        }
         String newImages = objectMapper.writeValueAsString(originImages); // 이미지 경로 json으로 변환
         store.updateImages(newImages); // json string 저장
     }
