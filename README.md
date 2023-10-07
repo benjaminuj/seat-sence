@@ -26,12 +26,12 @@ password : admin3333@
 
 # Index
 
-- [How to Use (BackEnd)](#How-to-Use-(BackEnd))
+- [How to Use](#How-to-Use)
 - [Stacks](#Stacks)
  
 ---
 
-# How to Use (BackEnd)
+# How to Use
 
 ## Requirements 
 You require the following to build SEAT SENSE:
@@ -54,7 +54,7 @@ $ ./gradlew --exclude-task -test clean build
 $ java -jar -Dspring.profiles.active=dev build/libs/seat-sence-0.0.1-SNAPSHOT.jar
 ```
 
-# Stacks (BackEnd)
+# Stacks
 
 ### Development
 <div align=center> 
