@@ -133,17 +133,36 @@ public class UserUtilizationService {
     }
 
     public List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate>
-            getAllUtilizationsForSpaceAndDate(Long spaceId, LocalDateTime standardTime) {
+            getAllUtilizationsForSpaceAndDate(Long spaceId, LocalDateTime standardSchedule) {
         LocalDate now = LocalDate.now();
 
         // 예약
         List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate> list =
-                userReservationService.getAllReservationsForSpaceAndDate(spaceId, standardTime);
+                userReservationService.getAllReservationsForSpaceAndDate(spaceId, standardSchedule);
 
-        if (now.isEqual(standardTime.toLocalDate())) {
+        if (now.isEqual(standardSchedule.toLocalDate())) {
             // 바로사용
             AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate walkIn =
-                    walkInService.getAllWalkInForSpaceAndDate(spaceId, standardTime);
+                    walkInService.getAllWalkInForSpaceAndDate(spaceId, standardSchedule);
+            if (walkIn != null) {
+                list.add(0, walkIn);
+            }
+        }
+        return list;
+    }
+
+    public List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate>
+            getAllUtilizationsForChairAndDate(Long chairId, LocalDateTime standardSchedule) {
+        LocalDate now = LocalDate.now();
+
+        // 예약
+        List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate> list =
+                userReservationService.getAllReservationsForChairAndDate(chairId, standardSchedule);
+
+        if (now.isEqual(standardSchedule.toLocalDate())) {
+            // 바로사용
+            AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate walkIn =
+                    walkInService.getAllWalkInForChairAndDate(chairId, standardSchedule);
             if (walkIn != null) {
                 list.add(0, walkIn);
             }

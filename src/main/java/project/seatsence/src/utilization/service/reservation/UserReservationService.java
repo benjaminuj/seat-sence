@@ -209,84 +209,86 @@ public class UserReservationService {
     }
 
     public List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate>
-            getAllReservationsForChairAndDate(
-                    Long chairIdToReservation, LocalDateTime reservationDateAndTime) {
-
-        StoreChair storeChair = storeChairService.findByIdAndState(chairIdToReservation);
+            getAllReservationsForChairAndDate(Long chairId, LocalDateTime standardSchedule) {
+        StoreChair storeChair = storeChairService.findByIdAndState(chairId);
 
         LocalDateTime limit =
-                utilizationService.setLimitTimeToGetAllReservationsOfThatDay(
-                        reservationDateAndTime);
+                utilizationService.setLimitTimeToGetAllReservationsOfThatDay(standardSchedule);
 
         List<ReservationStatus> reservationStatuses =
                 setPossibleReservationStatusToCancelReservation();
 
-        List<Reservation> reservations =
+        List<Reservation> reservationsByChair =
                 findAllByReservedStoreChairAndReservationStatusInAndEndScheduleIsAfterAndEndScheduleIsBeforeAndState(
-                        storeChair, reservationStatuses, reservationDateAndTime, limit);
+                        storeChair, reservationStatuses, standardSchedule, limit);
 
-        List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate> mappedReservations =
-                reservations.stream()
-                        .map(
-                                reservation ->
-                                        AllUtilizationsForSeatAndDateResponse
-                                                .UtilizationForSeatAndDate.from(reservation))
-                        .collect(Collectors.toList());
+        removeInvalidUtilizationStatusData(reservationsByChair);
 
-        return mappedReservations;
+        Collections.sort(reservationsByChair, startScheduleComparator);
+
+        return mapUtilizationForSeatAndDateTo(reservationsByChair);
+    }
+
+    /**
+     * 유효하지 않은 이용 상태(CHECK_IN이 아닌)의 값을 가진 데이터 제거
+     *
+     * @param list
+     */
+    public void removeInvalidUtilizationStatusData(List<Reservation> list) {
+        for (int i = 0; i < list.size(); i++) {
+            Reservation reservation = list.get(i);
+            Utilization utilizationFound =
+                    utilizationService.findAllByReservationAndState(reservation);
+            if (utilizationFound == null) continue;
+            if (utilizationFound.getUtilizationStatus() != UtilizationStatus.CHECK_IN) {
+                list.remove(reservation);
+            }
+        }
+    }
+
+    public List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate>
+            mapUtilizationForSeatAndDateTo(List<Reservation> list) {
+        return list.stream()
+                .map(
+                        reservation ->
+                                AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate
+                                        .from(reservation))
+                .collect(Collectors.toList());
     }
 
     // Todo : perform improvement Refactor - loop
     public List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate>
-            getAllReservationsForSpaceAndDate(Long spaceId, LocalDateTime standardTime) {
-        List<Reservation> reservationList = new ArrayList<>();
-
+            getAllReservationsForSpaceAndDate(Long spaceId, LocalDateTime standardSchedule) {
         StoreSpace storeSpace = storeSpaceService.findByIdAndState(spaceId);
 
         LocalDateTime limit =
-                utilizationService.setLimitTimeToGetAllReservationsOfThatDay(standardTime);
+                utilizationService.setLimitTimeToGetAllReservationsOfThatDay(standardSchedule);
         List<ReservationStatus> reservationStatuses =
                 setPossibleReservationStatusToCancelReservation();
 
         List<Reservation> reservationsBySpace =
                 findAllByReservedStoreSpaceAndReservationStatusInAndEndScheduleIsAfterAndEndScheduleIsBeforeAndState(
-                        storeSpace, reservationStatuses, standardTime, limit);
+                        storeSpace, reservationStatuses, standardSchedule, limit);
 
-        reservationList = reservationsBySpace;
+        List<Reservation> reservationList = reservationsBySpace;
 
         List<StoreChair> storeChairList = storeChairService.findAllByStoreSpaceAndState(storeSpace);
 
         for (StoreChair storeChair : storeChairList) {
             List<Reservation> reservationsByChairInSpace =
                     findAllByReservedStoreChairAndReservationStatusInAndEndScheduleIsAfterAndEndScheduleIsBeforeAndState(
-                            storeChair, reservationStatuses, standardTime, limit);
+                            storeChair, reservationStatuses, standardSchedule, limit);
 
             for (Reservation reservation : reservationsByChairInSpace) {
                 reservationList.add(reservation);
             }
         }
 
-        for (int i = 0; i < reservationList.size(); i++) {
-            Reservation reservation = reservationList.get(i);
-            Utilization utilizationFound =
-                    utilizationService.findAllByReservationAndState(reservation);
-            if (utilizationFound == null) continue;
-            if (utilizationFound.getUtilizationStatus() != UtilizationStatus.CHECK_IN) {
-                reservationList.remove(reservation);
-            }
-        }
+        removeInvalidUtilizationStatusData(reservationList);
 
         Collections.sort(reservationList, startScheduleComparator);
 
-        List<AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate> mappedReservations =
-                reservationList.stream()
-                        .map(
-                                reservation ->
-                                        AllUtilizationsForSeatAndDateResponse
-                                                .UtilizationForSeatAndDate.from(reservation))
-                        .collect(Collectors.toList());
-
-        return mappedReservations;
+        return mapUtilizationForSeatAndDateTo(reservationList);
     }
 
     public List<ReservationStatus> setPossibleReservationStatusToCancelReservation() {

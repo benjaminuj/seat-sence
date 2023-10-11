@@ -75,7 +75,7 @@ public class WalkInService {
             Utilization utilizationFoundBySpaceWalkIn =
                     utilizationService.findByWalkInIdAndState(walkIn.getId());
             if (isUtilizationStatusInUse(utilizationFoundBySpaceWalkIn)) {
-                return mappingFromWalkInToUtilizationForSeatAndDate(walkIn);
+                return mapUtilizationForSeatAndDateTo(walkIn);
             }
         }
 
@@ -89,7 +89,7 @@ public class WalkInService {
                 Utilization utilizationFoundByChairWalkIn =
                         utilizationService.findByWalkInIdAndState(walkIn.getId());
                 if (isUtilizationStatusInUse(utilizationFoundByChairWalkIn)) {
-                    return mappingFromWalkInToUtilizationForSeatAndDate(walkIn);
+                    return mapUtilizationForSeatAndDateTo(walkIn);
                 }
             }
         }
@@ -101,7 +101,24 @@ public class WalkInService {
     }
 
     public AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate
-            mappingFromWalkInToUtilizationForSeatAndDate(WalkIn walkIn) {
+            mapUtilizationForSeatAndDateTo(WalkIn walkIn) {
         return AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate.from(walkIn);
+    }
+
+    public AllUtilizationsForSeatAndDateResponse.UtilizationForSeatAndDate
+            getAllWalkInForChairAndDate(Long chairId, LocalDateTime standardSchedule) {
+        StoreChair storeChair = storeChairService.findByIdAndState(chairId);
+
+        List<WalkIn> allWalkInFoundByChair =
+                findAllByUsedStoreChairAndEndScheduleIsAfterAndState(storeChair, standardSchedule);
+
+        for (WalkIn walkIn : allWalkInFoundByChair) {
+            Utilization utilizationFoundByChairWalkIn =
+                    utilizationService.findByWalkInIdAndState(walkIn.getId());
+            if (isUtilizationStatusInUse(utilizationFoundByChairWalkIn)) {
+                return mapUtilizationForSeatAndDateTo(walkIn);
+            }
+        }
+        return null;
     }
 }
