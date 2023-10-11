@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -49,6 +50,22 @@ public class Participation extends BaseEntity {
     private ParticipationStatus participationStatus;
 
     @NotNull private LocalDateTime startSchedule;
+
+    @Builder
+    public Participation(
+            @Nullable Reservation reservation,
+            @Nullable WalkIn walkIn,
+            User user,
+            Store store,
+            ParticipationStatus participationStatus,
+            LocalDateTime startSchedule) {
+        this.reservation = reservation;
+        this.walkIn = walkIn;
+        this.user = user;
+        this.store = store;
+        this.participationStatus = participationStatus;
+        this.startSchedule = startSchedule;
+    }
 
     public void cancelParticipation() {
         participationStatus = ParticipationStatus.CANCELED;

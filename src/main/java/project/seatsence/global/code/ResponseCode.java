@@ -70,7 +70,10 @@ public enum ResponseCode {
             NOT_FOUND, "CUSTOM_UTILIZATION_FIELD_404_001", "이용 커스텀 필드를 찾을 수 없습니다."),
 
     /** Participation error code */
-    PARTICIPATION_NOT_FOUND(NOT_FOUND, "PARTICIPATION_404_001", "참여 내역을 찾을 수 없습니다.");
+    PARTICIPATION_NOT_FOUND(NOT_FOUND, "PARTICIPATION_404_001", "참여 내역을 찾을 수 없습니다."),
+    INVALID_SELF_PARTICIPATION_APPLICATION(
+            BAD_REQUEST, "PARTICIPATION_400_001", "신청자 본인은 참여 신청 할 수 없습니다."),
+    USER_ALREADY_APPLY(BAD_REQUEST, "PARTICIPATION_400_002", "이미 참여 신청한 유저입니다");
 
     private final HttpStatus status;
     private final String code;

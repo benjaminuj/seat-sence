@@ -1,7 +1,8 @@
 package project.seatsence.src.utilization.service.participation;
 
-import static project.seatsence.global.code.ResponseCode.PARTICIPATION_NOT_FOUND;
+import static project.seatsence.global.code.ResponseCode.*;
 import static project.seatsence.global.entity.BaseTimeAndStateEntity.State.ACTIVE;
+import static project.seatsence.src.utilization.domain.Participation.ParticipationStatus.UPCOMING_PARTICIPATION;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import project.seatsence.src.utilization.domain.Participation.Participation;
 import project.seatsence.src.utilization.domain.Participation.ParticipationStatus;
 import project.seatsence.src.utilization.domain.reservation.Reservation;
 import project.seatsence.src.utilization.domain.walkin.WalkIn;
+import project.seatsence.src.utilization.dto.request.participation.UserParticipationRequest;
 import project.seatsence.src.utilization.dto.response.participation.StoreParticipationListResponse;
 import project.seatsence.src.utilization.dto.response.participation.UserParticipationListResponse;
 import project.seatsence.src.utilization.service.reservation.ReservationService;
@@ -60,7 +62,7 @@ public class ParticipationService {
 
         Slice<Participation> participationSlice =
                 findAllByUserEmailAndParticipationStatusAndStateOrderByStartScheduleDesc(
-                        userEmail, ParticipationStatus.UPCOMING_PARTICIPATION, pageable);
+                        userEmail, UPCOMING_PARTICIPATION, pageable);
 
         return participationSlice;
     }
@@ -200,5 +202,65 @@ public class ParticipationService {
                 .endSchedule(endSchedule)
                 .userNickname(userNickname)
                 .build();
+    }
+
+    public void inputSpaceParticipation(
+            String userEmail, UserParticipationRequest userParticipationRequest) {
+
+        Long id = null;
+        User user = userService.findUserByUserEmailAndState(userEmail);
+
+        if (userParticipationRequest.getUtilizationUnit().equals("예약")) {
+            Reservation reservation =
+                    reservationService.findByIdAndState(userParticipationRequest.getId());
+            if (user == reservation.getUser()) {
+                throw new BaseException(INVALID_SELF_PARTICIPATION_APPLICATION);
+            }
+            if (alreadyParticipate(user, reservation, null)) {
+                throw new BaseException(USER_ALREADY_APPLY);
+            }
+            Store store = reservation.getStore();
+            Participation newParticipation =
+                    new Participation(
+                            reservation,
+                            null,
+                            user,
+                            store,
+                            UPCOMING_PARTICIPATION,
+                            reservation.getStartSchedule());
+            participationRepository.save(newParticipation);
+        } else {
+            WalkIn walkIn = walkInService.findByIdAndState(userParticipationRequest.getId());
+            if (user == walkIn.getUser()) {
+                throw new BaseException(INVALID_SELF_PARTICIPATION_APPLICATION);
+            }
+            if (alreadyParticipate(user, null, walkIn)) {
+                throw new BaseException(USER_ALREADY_APPLY);
+            }
+            Store store = walkIn.getStore();
+            Participation newParticipation =
+                    new Participation(
+                            null,
+                            walkIn,
+                            user,
+                            store,
+                            UPCOMING_PARTICIPATION,
+                            walkIn.getStartSchedule());
+            participationRepository.save(newParticipation);
+        }
+    }
+
+    public Boolean alreadyParticipate(User user, Reservation reservation, WalkIn walkIn) {
+
+        Boolean result = false;
+
+        if (reservation != null) {
+            result =
+                    participationRepository.existsByUserAndReservationAndState(
+                            user, reservation, ACTIVE);
+        } else {
+            result = participationRepository.existsByUserAndWalkInAndState(user, walkIn, ACTIVE);
+        }
+        return result;
     }
 }

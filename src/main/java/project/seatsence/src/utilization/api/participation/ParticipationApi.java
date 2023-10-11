@@ -4,6 +4,7 @@ import static project.seatsence.global.constants.Constants.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.api.annotations.ParameterObject;
@@ -15,6 +16,7 @@ import project.seatsence.global.config.security.JwtProvider;
 import project.seatsence.global.response.SliceResponse;
 import project.seatsence.src.store.service.StoreService;
 import project.seatsence.src.utilization.domain.Participation.Participation;
+import project.seatsence.src.utilization.dto.request.participation.UserParticipationRequest;
 import project.seatsence.src.utilization.dto.response.participation.StoreParticipationListResponse;
 import project.seatsence.src.utilization.dto.response.participation.UserParticipationListResponse;
 import project.seatsence.src.utilization.service.participation.ParticipationService;
@@ -85,5 +87,16 @@ public class ParticipationApi {
                 participationService.getParticipationSpace(storeId, pageable);
 
         return sliceResponse;
+    }
+
+    @Operation(summary = "가게 스페이스 참여")
+    @PostMapping("/space-participation")
+    public void inputSpaceParticipation(
+            @RequestHeader(AUTHORIZATION_HEADER) String accessToken,
+            @CookieValue(COOKIE_NAME_PREFIX_SECURE + REFRESH_TOKEN_NAME) String refreshToken,
+            @Valid @RequestBody UserParticipationRequest userParticipationRequest) {
+
+        String userEmail = JwtProvider.getUserEmailFromValidToken(accessToken, refreshToken);
+        participationService.inputSpaceParticipation(userEmail, userParticipationRequest);
     }
 }

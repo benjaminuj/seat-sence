@@ -16,7 +16,7 @@ import project.seatsence.src.store.domain.StoreSpace;
 import project.seatsence.src.user.domain.User;
 
 @Getter
-@Entity
+@Entity(name = "WalkIn")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 public class WalkIn extends BaseEntity {
