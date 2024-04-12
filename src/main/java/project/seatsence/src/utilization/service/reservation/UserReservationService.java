@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.seatsence.global.response.SliceResponse;
 import project.seatsence.src.store.domain.CustomUtilizationField;
+import project.seatsence.src.store.domain.Store;
 import project.seatsence.src.store.domain.StoreChair;
 import project.seatsence.src.store.domain.StoreSpace;
 import project.seatsence.src.store.service.StoreChairService;
@@ -363,5 +364,36 @@ public class UserReservationService {
         return reservationRepository
                 .findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
                         storeId, APPROVED, LocalDateTime.now(), ACTIVE);
+    }
+
+    public void chairReservation(String userEmail, ChairUtilizationRequest chairUtilizationRequest)
+            throws JsonProcessingException {
+        log.info(
+                "예약 시작! storeChairId : {}, userEmail : {}",
+                chairUtilizationRequest.getStoreChairId(),
+                userEmail);
+        StoreChair storeChair =
+                storeChairService.findByIdAndState(chairUtilizationRequest.getStoreChairId());
+
+        Store store = storeService.findByIdAndState(storeChair.getStoreSpace().getStore().getId());
+
+        User user = userService.findByEmailAndState(userEmail);
+
+        Reservation reservation =
+                Reservation.builder()
+                        .store(store)
+                        .reservedStoreChair(storeChair)
+                        .reservedStoreSpace(null)
+                        .user(user)
+                        .startSchedule(chairUtilizationRequest.getStartSchedule())
+                        .endSchedule(chairUtilizationRequest.getEndSchedule())
+                        .build();
+
+        reservationService.save(reservation);
+
+        // custom utilization content 관련
+        inputChairCustomUtilizationContent(user, reservation, chairUtilizationRequest);
+
+        log.info("{} 고객님의 예약이 완료되었습니다.", user.getNickname());
     }
 }
