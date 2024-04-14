@@ -1,5 +1,6 @@
 package project.seatsence.src.utilization.service.reservation;
 
+import static project.seatsence.global.code.ResponseCode.*;
 import static project.seatsence.global.constants.Constants.MIN_HOURS_FOR_SAME_DAY_RESERVATION;
 import static project.seatsence.global.constants.Constants.UTILIZATION_TIME_UNIT;
 import static project.seatsence.global.entity.BaseTimeAndStateEntity.State.ACTIVE;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.seatsence.global.code.ResponseCode;
+import project.seatsence.global.exceptions.BaseException;
 import project.seatsence.global.response.SliceResponse;
 import project.seatsence.src.store.domain.CustomUtilizationField;
 import project.seatsence.src.store.domain.Store;
@@ -308,6 +311,21 @@ public class UserReservationService {
     }
 
     public List<Reservation>
+            findAllByReservedStoreChairAndReservationStatusInAndStartScheduleIsBeforeAndEndScheduleIsAfterAndState(
+                    StoreChair storeChair,
+                    List<ReservationStatus> reservationStatuses,
+                    LocalDateTime reservationDateTime1,
+                    LocalDateTime reservationDateTime2) {
+        return reservationRepository
+                .findAllByReservedStoreChairAndReservationStatusInAndStartScheduleIsBeforeAndEndScheduleIsAfterAndState(
+                        storeChair,
+                        reservationStatuses,
+                        reservationDateTime1,
+                        reservationDateTime2,
+                        ACTIVE);
+    }
+
+    public List<Reservation>
             findAllByReservedStoreSpaceAndReservationStatusInAndEndScheduleIsAfterAndEndScheduleIsBeforeAndState(
                     StoreSpace storeSpace,
                     List<ReservationStatus> reservationStatuses,
@@ -375,6 +393,14 @@ public class UserReservationService {
         StoreChair storeChair =
                 storeChairService.findByIdAndState(chairUtilizationRequest.getStoreChairId());
 
+        // 예약 내용이 겹치는지 확인
+        if (existsReservationAtDateTime(
+                storeChair,
+                chairUtilizationRequest.getStartSchedule(),
+                chairUtilizationRequest.getEndSchedule())) {
+            throw new BaseException(ResponseCode.RESERVATION_ALREADY_EXIST);
+        }
+
         Store store = storeService.findByIdAndState(storeChair.getStoreSpace().getStore().getId());
 
         User user = userService.findByEmailAndState(userEmail);
@@ -396,5 +422,29 @@ public class UserReservationService {
 
         log.info("{} 고객님의 예약이 완료되었습니다.", user.getNickname());
         return savedId;
+    }
+
+    public Boolean existsReservationAtDateTime(
+            StoreChair storeChair, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        List<ReservationStatus> reservationStatuses = new ArrayList<>();
+        reservationStatuses.add(ReservationStatus.APPROVED);
+        reservationStatuses.add(ReservationStatus.PENDING);
+
+        List<Reservation> reservationsBasedStartDateTime =
+                findAllByReservedStoreChairAndReservationStatusInAndStartScheduleIsBeforeAndEndScheduleIsAfterAndState(
+                        storeChair, reservationStatuses, startDateTime, startDateTime);
+
+        if (reservationsBasedStartDateTime.size() > 0) {
+            return true;
+        }
+
+        List<Reservation> reservationsBasedEndDateTime =
+                findAllByReservedStoreChairAndReservationStatusInAndStartScheduleIsBeforeAndEndScheduleIsAfterAndState(
+                        storeChair, reservationStatuses, endDateTime, endDateTime);
+
+        if (reservationsBasedEndDateTime.size() > 0) {
+            return true;
+        }
+        return false;
     }
 }

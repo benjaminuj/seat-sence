@@ -57,6 +57,7 @@ public enum ResponseCode {
     INVALID_TIME_TO_MODIFY_RESERVATION_STATUS(
             BAD_REQUEST, "RESERVATION_400_003", "예약 상태를 관리할 수 없는 시간입니다."),
     RESERVATION_NOT_FOUND(NOT_FOUND, "RESERVATION_404_001", "예약 내역을 찾을 수 없습니다."),
+    RESERVATION_ALREADY_EXIST(BAD_REQUEST, "RESERVATION_400_004", "해당 내용으로 예약된 내역이 이미 존재합니다."),
 
     /** Walk in error code */
     WALK_IN_NOT_FOUND(NOT_FOUND, "WALK_IN_404_001", "바로사용 내역을 찾을 수 없습니다."),

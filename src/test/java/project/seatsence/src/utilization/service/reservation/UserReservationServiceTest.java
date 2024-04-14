@@ -34,8 +34,8 @@ class UserReservationServiceTest {
 
         String userEmail = "yes@naver.com";
         long storeChairId = 1500031;
-        LocalDateTime startSchedule = LocalDateTime.of(2024, 11, 30, 3, 0, 0);
-        LocalDateTime endSchedule = LocalDateTime.of(2024, 11, 30, 3, 30, 0);
+        LocalDateTime startSchedule = LocalDateTime.of(2024, 10, 30, 3, 0, 0);
+        LocalDateTime endSchedule = LocalDateTime.of(2024, 10, 30, 3, 30, 0);
 
         long fieldId = 1;
         List<String> content = Arrays.asList("스터디");
@@ -67,8 +67,11 @@ class UserReservationServiceTest {
                         long id =
                                 userReservationService.chairReservation(
                                         userEmail, utilizationRequest1);
-                        synchronized (object) {
-                            ids.add(id);
+
+                        if (id != -1) {
+                            synchronized (object) {
+                                ids.add(id);
+                            }
                         }
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
@@ -81,8 +84,11 @@ class UserReservationServiceTest {
                         long id =
                                 userReservationService.chairReservation(
                                         userEmail, utilizationRequest2);
-                        synchronized (object) {
-                            ids.add(id);
+
+                        if (id != -1) {
+                            synchronized (object) {
+                                ids.add(id);
+                            }
                         }
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
