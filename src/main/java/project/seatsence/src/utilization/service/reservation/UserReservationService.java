@@ -366,7 +366,7 @@ public class UserReservationService {
                         storeId, APPROVED, LocalDateTime.now(), ACTIVE);
     }
 
-    public void chairReservation(String userEmail, ChairUtilizationRequest chairUtilizationRequest)
+    public long chairReservation(String userEmail, ChairUtilizationRequest chairUtilizationRequest)
             throws JsonProcessingException {
         log.info(
                 "예약 시작! storeChairId : {}, userEmail : {}",
@@ -389,11 +389,12 @@ public class UserReservationService {
                         .endSchedule(chairUtilizationRequest.getEndSchedule())
                         .build();
 
-        reservationService.save(reservation);
+        long savedId = reservationService.save(reservation).getId();
 
         // custom utilization content 관련
         inputChairCustomUtilizationContent(user, reservation, chairUtilizationRequest);
 
         log.info("{} 고객님의 예약이 완료되었습니다.", user.getNickname());
+        return savedId;
     }
 }

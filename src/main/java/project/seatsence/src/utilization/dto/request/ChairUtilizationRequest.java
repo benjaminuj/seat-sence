@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class ChairUtilizationRequest {
     @NotNull(message = "의자 식별자가 입력되지 않았습니다.")
     @Parameter(
