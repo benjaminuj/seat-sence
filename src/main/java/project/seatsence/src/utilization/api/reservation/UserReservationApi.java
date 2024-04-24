@@ -61,9 +61,6 @@ public class UserReservationApi {
         StoreChair storeChairFound =
                 storeChairService.findByIdAndState(chairUtilizationRequest.getStoreChairId());
 
-        Store storeFound =
-                storeService.findByIdAndState(storeChairFound.getStoreSpace().getStore().getId());
-
         if (storeSpaceService.reservationUnitIsOnlySpace(storeChairFound.getStoreSpace())) {
             throw new BaseException(INVALID_UTILIZATION_TIME);
         }
@@ -101,23 +98,7 @@ public class UserReservationApi {
             }
         }
 
-        User userFound = userService.findByEmailAndState(userEmail);
-
-        Reservation reservation =
-                Reservation.builder()
-                        .store(storeFound)
-                        .reservedStoreChair(storeChairFound)
-                        .reservedStoreSpace(null)
-                        .user(userFound)
-                        .startSchedule(chairUtilizationRequest.getStartSchedule())
-                        .endSchedule(chairUtilizationRequest.getEndSchedule())
-                        .build();
-
-        reservationService.save(reservation);
-
-        // custom utilization content 관련
-        userReservationService.inputChairCustomUtilizationContent(
-                userFound, reservation, chairUtilizationRequest);
+        userReservationService.chairReservation(userEmail, chairUtilizationRequest);
     }
 
     @Operation(summary = "유저 스페이스 예약", description = "유저가 예약하고싶은 날짜의 특정 스페이스를 예약합니다.")

@@ -1,5 +1,6 @@
 package project.seatsence.src.utilization.service.reservation;
 
+import static project.seatsence.global.code.ResponseCode.*;
 import static project.seatsence.global.constants.Constants.MIN_HOURS_FOR_SAME_DAY_RESERVATION;
 import static project.seatsence.global.constants.Constants.UTILIZATION_TIME_UNIT;
 import static project.seatsence.global.entity.BaseTimeAndStateEntity.State.ACTIVE;
@@ -17,8 +18,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.seatsence.global.code.ResponseCode;
+import project.seatsence.global.exceptions.BaseException;
 import project.seatsence.global.response.SliceResponse;
 import project.seatsence.src.store.domain.CustomUtilizationField;
+import project.seatsence.src.store.domain.Store;
 import project.seatsence.src.store.domain.StoreChair;
 import project.seatsence.src.store.domain.StoreSpace;
 import project.seatsence.src.store.service.StoreChairService;
@@ -55,6 +59,7 @@ public class UserReservationService {
     private final CustomUtilizationContentRepository customUtilizationContentRepository;
     private final StoreService storeService;
     private final UtilizationService utilizationService;
+    private final NamedLockUserReservationFacade namedLockUserReservationFacade;
 
     private static Comparator<Reservation> startScheduleComparator =
             new Comparator<Reservation>() {
@@ -307,6 +312,14 @@ public class UserReservationService {
     }
 
     public List<Reservation>
+            findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
+                    Long storeId) {
+        return reservationRepository
+                .findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
+                        storeId, APPROVED, LocalDateTime.now(), ACTIVE);
+    }
+
+    public List<Reservation>
             findAllByReservedStoreSpaceAndReservationStatusInAndEndScheduleIsAfterAndEndScheduleIsBeforeAndState(
                     StoreSpace storeSpace,
                     List<ReservationStatus> reservationStatuses,
@@ -357,11 +370,37 @@ public class UserReservationService {
         }
     }
 
-    public List<Reservation>
-            findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
-                    Long storeId) {
-        return reservationRepository
-                .findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
-                        storeId, APPROVED, LocalDateTime.now(), ACTIVE);
+    public long chairReservation(String userEmail, ChairUtilizationRequest chairUtilizationRequest)
+            throws JsonProcessingException {
+        StoreChair storeChair =
+                storeChairService.findByIdAndState(chairUtilizationRequest.getStoreChairId());
+        Store store = storeService.findByIdAndState(storeChair.getStoreSpace().getStore().getId());
+        User user = userService.findByEmailAndState(userEmail);
+
+        Reservation reservation =
+                Reservation.builder()
+                        .store(store)
+                        .reservedStoreChair(storeChair)
+                        .reservedStoreSpace(null)
+                        .user(user)
+                        .startSchedule(chairUtilizationRequest.getStartSchedule())
+                        .endSchedule(chairUtilizationRequest.getEndSchedule())
+                        .build();
+
+        // 동시성처리: 의자 예약 일정 겹치는지 검사 && 일정 겹치지 않으면 예약 DB에 저장
+        long savedId =
+                namedLockUserReservationFacade.chairReservation(
+                        storeChair,
+                        chairUtilizationRequest.getStartSchedule(),
+                        chairUtilizationRequest.getEndSchedule(),
+                        reservation);
+
+        if (savedId == -1) {
+            throw new BaseException(ResponseCode.RESERVATION_ALREADY_EXIST);
+        }
+
+        inputChairCustomUtilizationContent(user, reservation, chairUtilizationRequest);
+
+        return savedId;
     }
 }
