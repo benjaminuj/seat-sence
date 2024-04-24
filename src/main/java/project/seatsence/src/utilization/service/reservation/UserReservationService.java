@@ -59,6 +59,7 @@ public class UserReservationService {
     private final CustomUtilizationContentRepository customUtilizationContentRepository;
     private final StoreService storeService;
     private final UtilizationService utilizationService;
+    private final NamedLockUserReservationFacade namedLockUserReservationFacade;
 
     private static Comparator<Reservation> startScheduleComparator =
             new Comparator<Reservation>() {
@@ -311,18 +312,11 @@ public class UserReservationService {
     }
 
     public List<Reservation>
-            findAllByReservedStoreChairAndReservationStatusInAndStartScheduleIsBeforeAndEndScheduleIsAfterAndState(
-                    StoreChair storeChair,
-                    List<ReservationStatus> reservationStatuses,
-                    LocalDateTime reservationDateTime1,
-                    LocalDateTime reservationDateTime2) {
+            findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
+                    Long storeId) {
         return reservationRepository
-                .findAllByReservedStoreChairAndReservationStatusInAndStartScheduleIsBeforeAndEndScheduleIsAfterAndState(
-                        storeChair,
-                        reservationStatuses,
-                        reservationDateTime1,
-                        reservationDateTime2,
-                        ACTIVE);
+                .findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
+                        storeId, APPROVED, LocalDateTime.now(), ACTIVE);
     }
 
     public List<Reservation>
@@ -376,33 +370,11 @@ public class UserReservationService {
         }
     }
 
-    public List<Reservation>
-            findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
-                    Long storeId) {
-        return reservationRepository
-                .findByStoreIdAndReservationStatusAndEndScheduleAfterAndReservedStoreSpaceIdIsNotNullAndState(
-                        storeId, APPROVED, LocalDateTime.now(), ACTIVE);
-    }
-
     public long chairReservation(String userEmail, ChairUtilizationRequest chairUtilizationRequest)
             throws JsonProcessingException {
-        log.info(
-                "예약 시작! storeChairId : {}, userEmail : {}",
-                chairUtilizationRequest.getStoreChairId(),
-                userEmail);
         StoreChair storeChair =
                 storeChairService.findByIdAndState(chairUtilizationRequest.getStoreChairId());
-
-        // 예약 내용이 겹치는지 확인
-        if (existsReservationAtDateTime(
-                storeChair,
-                chairUtilizationRequest.getStartSchedule(),
-                chairUtilizationRequest.getEndSchedule())) {
-            throw new BaseException(ResponseCode.RESERVATION_ALREADY_EXIST);
-        }
-
         Store store = storeService.findByIdAndState(storeChair.getStoreSpace().getStore().getId());
-
         User user = userService.findByEmailAndState(userEmail);
 
         Reservation reservation =
@@ -415,36 +387,20 @@ public class UserReservationService {
                         .endSchedule(chairUtilizationRequest.getEndSchedule())
                         .build();
 
-        long savedId = reservationService.save(reservation).getId();
+        // 동시성처리: 의자 예약 일정 겹치는지 검사 && 일정 겹치지 않으면 예약 DB에 저장
+        long savedId =
+                namedLockUserReservationFacade.chairReservation(
+                        storeChair,
+                        chairUtilizationRequest.getStartSchedule(),
+                        chairUtilizationRequest.getEndSchedule(),
+                        reservation);
 
-        // custom utilization content 관련
+        if (savedId == -1) {
+            throw new BaseException(ResponseCode.RESERVATION_ALREADY_EXIST);
+        }
+
         inputChairCustomUtilizationContent(user, reservation, chairUtilizationRequest);
 
-        log.info("{} 고객님의 예약이 완료되었습니다.", user.getNickname());
         return savedId;
-    }
-
-    public Boolean existsReservationAtDateTime(
-            StoreChair storeChair, LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        List<ReservationStatus> reservationStatuses = new ArrayList<>();
-        reservationStatuses.add(ReservationStatus.APPROVED);
-        reservationStatuses.add(ReservationStatus.PENDING);
-
-        List<Reservation> reservationsBasedStartDateTime =
-                findAllByReservedStoreChairAndReservationStatusInAndStartScheduleIsBeforeAndEndScheduleIsAfterAndState(
-                        storeChair, reservationStatuses, startDateTime, startDateTime);
-
-        if (reservationsBasedStartDateTime.size() > 0) {
-            return true;
-        }
-
-        List<Reservation> reservationsBasedEndDateTime =
-                findAllByReservedStoreChairAndReservationStatusInAndStartScheduleIsBeforeAndEndScheduleIsAfterAndState(
-                        storeChair, reservationStatuses, endDateTime, endDateTime);
-
-        if (reservationsBasedEndDateTime.size() > 0) {
-            return true;
-        }
-        return false;
     }
 }

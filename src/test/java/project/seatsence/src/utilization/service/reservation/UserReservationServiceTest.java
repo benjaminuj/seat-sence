@@ -13,29 +13,32 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import project.seatsence.global.code.ResponseCode;
+import project.seatsence.global.exceptions.BaseException;
 import project.seatsence.src.utilization.dto.request.ChairUtilizationRequest;
 import project.seatsence.src.utilization.dto.request.CustomUtilizationContentRequest;
 
 @Slf4j
 @SpringBootTest
 class UserReservationServiceTest {
-
     @Autowired private UserReservationService userReservationService;
 
+    // 의자 예약 동시성 검증 코드
     @Test
     void testChairReservationConcurrency() throws InterruptedException {
-        System.out.println("chairReservation 동시성 테스트 시작");
-
         // Given
-        System.out.println("chairReservation 동시성 테스트 준비");
         int numberOfThreads = 2;
         ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
         String userEmail = "yes@naver.com";
         long storeChairId = 1500031;
-        LocalDateTime startSchedule = LocalDateTime.of(2024, 10, 30, 3, 0, 0);
-        LocalDateTime endSchedule = LocalDateTime.of(2024, 10, 30, 3, 30, 0);
+
+        LocalDateTime startSchedule1 = LocalDateTime.of(2024, 10, 29, 3, 0, 0);
+        LocalDateTime endSchedule1 = LocalDateTime.of(2024, 10, 29, 6, 30, 0);
+
+        LocalDateTime startSchedule2 = LocalDateTime.of(2024, 10, 29, 4, 0, 0);
+        LocalDateTime endSchedule2 = LocalDateTime.of(2024, 10, 29, 7, 30, 0);
 
         long fieldId = 1;
         List<String> content = Arrays.asList("스터디");
@@ -45,60 +48,64 @@ class UserReservationServiceTest {
         ChairUtilizationRequest utilizationRequest1 =
                 new ChairUtilizationRequest(
                         storeChairId,
-                        startSchedule,
-                        endSchedule,
+                        startSchedule1,
+                        endSchedule1,
                         Arrays.asList(customUtilizationContentRequest));
         ChairUtilizationRequest utilizationRequest2 =
                 new ChairUtilizationRequest(
                         storeChairId,
-                        startSchedule,
-                        endSchedule,
+                        startSchedule2,
+                        endSchedule2,
                         Arrays.asList(customUtilizationContentRequest));
 
         // When
-        System.out.println("chairReservation 동시성 테스트 진행");
         List<Long> ids = new ArrayList<>();
-
-        Object object = new Object();
 
         service.execute(
                 () -> {
+                    long id = -1;
+
                     try {
-                        long id =
+                        id =
                                 userReservationService.chairReservation(
                                         userEmail, utilizationRequest1);
-
-                        if (id != -1) {
-                            synchronized (object) {
-                                ids.add(id);
-                            }
-                        }
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
+                    } catch (BaseException baseException) {
+                        log.error(ResponseCode.RESERVATION_ALREADY_EXIST.getMessage());
+                    }
+
+                    if (id != -1) {
+                        synchronized (this) {
+                            ids.add(id);
+                        }
                     }
                     latch.countDown();
                 });
+
         service.execute(
                 () -> {
+                    long id = -1;
                     try {
-                        long id =
+                        id =
                                 userReservationService.chairReservation(
                                         userEmail, utilizationRequest2);
-
-                        if (id != -1) {
-                            synchronized (object) {
-                                ids.add(id);
-                            }
-                        }
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
+                    } catch (BaseException baseException) {
+                        log.error(ResponseCode.RESERVATION_ALREADY_EXIST.getMessage());
+                    }
+
+                    if (id != -1) {
+                        synchronized (this) {
+                            ids.add(id);
+                        }
                     }
                     latch.countDown();
                 });
         latch.await();
 
         // Then
-        System.out.println("makeReservation 동시성 테스트 결과 검증");
         Assertions.assertThat(ids.size()).isEqualTo(1);
     }
 }
