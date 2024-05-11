@@ -2,7 +2,6 @@ spring:
   profiles:
     group:
       local: local, common
-      dev: dev, common
       prod: prod, common
     active: ${profile}
 
@@ -76,7 +75,7 @@ auth:
 spring:
   config:
     activate:
-      on-profile: "dev"
+      on-profile: "prod"
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
