@@ -51,7 +51,6 @@ public class SpringSecurityConfig {
                 .permitAll()
                 .anyRequest()
                 .authenticated();
-        //                .addFilterAfter(customAuthenticationFilter(), CsrfFilter.class);
         return http.build();
     }
 
