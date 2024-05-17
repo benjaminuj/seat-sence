@@ -45,7 +45,7 @@ public class SpringSecurityConfig {
                 .permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest)
                 .permitAll()
-                .antMatchers("/")
+                .antMatchers("/index.html")
                 .permitAll()
                 .antMatchers("/v1/users/validate/**", "/v1/users/sign-in", "/v1/users/sign-up")
                 .permitAll()
