@@ -13,6 +13,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import project.seatsence.global.code.ResponseCode;
 import project.seatsence.global.exceptions.BaseException;
 import project.seatsence.src.utilization.dto.request.ChairUtilizationRequest;
@@ -20,6 +22,7 @@ import project.seatsence.src.utilization.dto.request.CustomUtilizationContentReq
 
 @Slf4j
 @SpringBootTest
+@TestPropertySource(locations = "classpath:application-test.yml")
 class UserReservationServiceTest {
     @Autowired private UserReservationService userReservationService;
 
