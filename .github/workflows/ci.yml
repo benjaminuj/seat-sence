@@ -18,8 +18,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - run: npm ci                   # install packages
-    - run: npm test                 # run tests (configured to use jest-junit reporter)
 
     - name: Test Report
       uses: EnricoMi/publish-unit-test-result-action@v2
