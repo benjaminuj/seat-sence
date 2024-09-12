@@ -14,13 +14,19 @@ jobs:
       contents: read
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.0.30
+        env:
+          MYSQL_ROOT_PASSWORD: root!
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: admin
+          MYSQL_PASSWORD: admin!
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          MYSQL_DATABASE: testdb
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
     steps:
     - uses: actions/checkout@v4
