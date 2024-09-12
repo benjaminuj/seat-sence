@@ -3,6 +3,7 @@ spring:
     group:
       local: local, common
       prod: prod, common
+      test: test, common
     active: ${profile}
 
 ---
@@ -97,6 +98,16 @@ spring:
   config:
     activate:
       on-profile: "local"
+  security:
+    user:
+      name: user
+      password: user!
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "test"
   security:
     user:
       name: user
