@@ -53,7 +53,13 @@ jobs:
         DB_NAME: testdb
         DB_USERNAME: admin
         DB_PASSWORD: admin!
-      run: profile=test ./gradlew clean build --warning-mode=all --stacktrace
+        profile: test
+        JWT_SECRET_KEY: ${{secrets.JWT_SECRET_KEY}}
+        AWS_ACCESS_KEY: ${{secrets.AWS_ACCESS_KEY}}
+        AWS_SECRET_KEY: ${{secrets.AWS_SECRET_KEY}}
+        AWS_S3_BUCKET: ${{secrets.AWS_S3_BUCKET}}
+        AWS_REGION: ${{secrets.AWS_REGION}}
+      run: ./gradlew clean build --warning-mode=all --stacktrace
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
