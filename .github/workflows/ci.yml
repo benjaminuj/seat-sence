@@ -53,8 +53,7 @@ jobs:
         DB_NAME: testdb
         DB_USERNAME: admin
         DB_PASSWORD: admin!
-        profile: local   # 로컬 프로파일 활성화
-      run: ./gradlew clean build -x test --warning-mode=all --stacktrace
+      run: ./gradlew clean build --warning-mode=all --stacktrace
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
