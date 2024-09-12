@@ -3,8 +3,8 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ "dev" ]
-  pull_request:
-    branches: [ "dev" ]
+  # pull_request:
+  #   branches: [ "dev" ]
 
 jobs:
   build:
@@ -12,6 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    services:
+      mysql:
+        image: mysql:8
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_DATABASE: testdb
 
     steps:
     - uses: actions/checkout@v4
