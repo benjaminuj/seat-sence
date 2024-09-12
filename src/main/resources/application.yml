@@ -83,6 +83,13 @@ auth:
   jwt:
     secret-key: ${JWT_SECRET_KEY}
 
+logging:
+  level:
+    com:
+      amazons:
+        util:
+          EC2MetadataUtils: error
+
 ---
 spring:
   config:
