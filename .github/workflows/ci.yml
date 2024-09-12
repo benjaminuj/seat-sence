@@ -55,8 +55,8 @@ jobs:
         DB_PASSWORD: admin!
         profile: test
         JWT_SECRET_KEY: 8eb2b2ca9189bc63cdeb27fc0131203c54fa91c537e664e5d83027e488b2b9a758830e7f420e9a0c3f65be7020e8f24e5a64131a3e341638e6a79b6b84b65d8f
-        AWS_ACCESS_KEY: ${{secrets.AWS_ACCESS_KEY}}
-        AWS_SECRET_KEY: ${{secrets.AWS_SECRET_KEY}}
+        AWS_ACCESS_KEY: AKIA6ODUZIKNMRN6UWX8
+        AWS_SECRET_KEY: o2RqNHqrCsfaHtNH2a9kE/d/WUZpqT3Lm9KKGmLP
         AWS_S3_BUCKET: seatsense
         AWS_REGION: ap-northeast-2
       run: ./gradlew clean build --warning-mode=all --stacktrace
