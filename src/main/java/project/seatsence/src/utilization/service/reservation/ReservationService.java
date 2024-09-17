@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import project.seatsence.global.exceptions.BaseException;
 import project.seatsence.src.store.domain.CustomUtilizationField;
 import project.seatsence.src.store.domain.ReservationUnit;
-import project.seatsence.src.store.domain.Store;
 import project.seatsence.src.store.domain.StoreChair;
 import project.seatsence.src.store.service.StoreChairService;
 import project.seatsence.src.store.service.StoreCustomService;
@@ -41,7 +40,6 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final StoreCustomService storeCustomService;
     private final CustomUtilizationContentRepository customUtilizationContentRepository;
-
 
     // test
     private final StoreChairService storeChairService;
@@ -98,46 +96,53 @@ public class ReservationService {
             Reservation reservation,
             ChairUtilizationRequest chairUtilizationRequest,
             String userEmail,
-            User user) throws JsonProcessingException {
+            User user)
+            throws JsonProcessingException {
         List<ReservationStatus> reservationStatuses = new ArrayList<>();
         reservationStatuses.add(ReservationStatus.APPROVED);
         reservationStatuses.add(ReservationStatus.PENDING);
-        System.out.println("겹치는 예약 데이터 조회 전 : " +  Thread.currentThread().getName());
+        System.out.println("겹치는 예약 데이터 조회 전 : " + Thread.currentThread().getName());
         List<Reservation> reservationsBasedStartDateTime =
                 findAllByReservedStoreChairAndReservationStatusInAndStartScheduleIsBeforeAndEndScheduleIsAfterAndState(
-                        storeChair, reservationStatuses, chairUtilizationRequest.getStartSchedule(), chairUtilizationRequest.getStartSchedule());
-        System.out.println("겹치는 예약 데이터 조회 후 : " +  Thread.currentThread().getName());
+                        storeChair,
+                        reservationStatuses,
+                        chairUtilizationRequest.getStartSchedule(),
+                        chairUtilizationRequest.getStartSchedule());
+        System.out.println("겹치는 예약 데이터 조회 후 : " + Thread.currentThread().getName());
         if (reservationsBasedStartDateTime.size() > 0) {
-            System.out.println("예약 시간 겹침 : " +  Thread.currentThread().getName());
+            System.out.println("예약 시간 겹침 : " + Thread.currentThread().getName());
             return -1;
         }
 
         List<Reservation> reservationsBasedEndDateTime =
                 findAllByReservedStoreChairAndReservationStatusInAndStartScheduleIsBeforeAndEndScheduleIsAfterAndState(
-                        storeChair, reservationStatuses, chairUtilizationRequest.getEndSchedule(), chairUtilizationRequest.getEndSchedule());
+                        storeChair,
+                        reservationStatuses,
+                        chairUtilizationRequest.getEndSchedule(),
+                        chairUtilizationRequest.getEndSchedule());
 
         if (reservationsBasedEndDateTime.size() > 0) {
-            System.out.println("예약 시간 겹침 : " +  Thread.currentThread().getName());
+            System.out.println("예약 시간 겹침 : " + Thread.currentThread().getName());
             return -1;
         }
 
         System.out.println("예약 가능 : " + Thread.currentThread().getName());
 
-//        StoreChair storeChair1 =
-//                storeChairService.findByIdAndState(1L);
-//        User user1 = userService.findByEmailAndState(userEmail);
-//        Store store1 = storeService.findByIdAndState(1L);
-//
-//
-//        Reservation reservation1 =
-//                Reservation.builder()
-//                        .store(store1)
-//                        .reservedStoreChair(storeChair1)
-//                        .reservedStoreSpace(null)
-//                        .user(user1)
-//                        .startSchedule(startDateTime)
-//                        .endSchedule(endDateTime)
-//                        .build();
+        //        StoreChair storeChair1 =
+        //                storeChairService.findByIdAndState(1L);
+        //        User user1 = userService.findByEmailAndState(userEmail);
+        //        Store store1 = storeService.findByIdAndState(1L);
+        //
+        //
+        //        Reservation reservation1 =
+        //                Reservation.builder()
+        //                        .store(store1)
+        //                        .reservedStoreChair(storeChair1)
+        //                        .reservedStoreSpace(null)
+        //                        .user(user1)
+        //                        .startSchedule(startDateTime)
+        //                        .endSchedule(endDateTime)
+        //                        .build();
 
         long reservationId = save(reservation).getId();
         inputChairCustomUtilizationContent(user, reservation, chairUtilizationRequest);

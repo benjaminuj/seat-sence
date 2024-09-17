@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,12 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import org.springframework.transaction.annotation.Transactional;
-import project.seatsence.global.code.ResponseCode;
-import project.seatsence.global.entity.BaseTimeAndStateEntity.State;
 import project.seatsence.global.exceptions.BaseException;
-import project.seatsence.src.store.dao.StoreChairRepository;
-import project.seatsence.src.store.domain.StoreChair;
 import project.seatsence.src.utilization.dto.request.ChairUtilizationRequest;
 import project.seatsence.src.utilization.dto.request.CustomUtilizationContentRequest;
 
@@ -43,8 +37,12 @@ class UserReservationServiceTest {
     @Sql(
             scripts = "/sql/store-table-test-data.sql",
             executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/sql/custom-utilization-field-test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/sql/delete-all-test-data.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+    @Sql(
+            scripts = "/sql/custom-utilization-field-test-data.sql",
+            executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(
+            scripts = "/sql/delete-all-test-data.sql",
+            executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
     void testChairReservationConcurrency() throws InterruptedException {
         // Given
         int numberOfThreads = 20;
@@ -96,7 +94,8 @@ class UserReservationServiceTest {
         service.execute(
                 () -> {
                     long id = -1;
-                    System.out.println("gildong@naver.com 실행 스레드: " + Thread.currentThread().getName());
+                    System.out.println(
+                            "gildong@naver.com 실행 스레드: " + Thread.currentThread().getName());
 
                     try {
                         id =
@@ -106,7 +105,8 @@ class UserReservationServiceTest {
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     } catch (BaseException baseException) {
-//                        log.error(ResponseCode.RESERVATION_ALREADY_EXIST.getMessage());
+                        //
+                        // log.error(ResponseCode.RESERVATION_ALREADY_EXIST.getMessage());
                         log.error("error!: " + Arrays.toString(baseException.getStackTrace()));
                     }
 
@@ -121,7 +121,8 @@ class UserReservationServiceTest {
         service.execute(
                 () -> {
                     long id = -1;
-                    System.out.println("minji@naver.com 실행 스레드: " + Thread.currentThread().getName());
+                    System.out.println(
+                            "minji@naver.com 실행 스레드: " + Thread.currentThread().getName());
 
                     try {
                         id =
@@ -131,7 +132,8 @@ class UserReservationServiceTest {
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     } catch (BaseException baseException) {
-//                        log.error(ResponseCode.RESERVATION_ALREADY_EXIST.getMessage());
+                        //
+                        // log.error(ResponseCode.RESERVATION_ALREADY_EXIST.getMessage());
                         log.error("error!: " + Arrays.toString(baseException.getStackTrace()));
                     }
 
@@ -144,27 +146,31 @@ class UserReservationServiceTest {
                 });
         latch.await();
 
-//        // 사용자 1의 예약 처리
-//        try {
-//            long id1 = userReservationService.chairReservation(user1Email, utilizationRequest1);
-//            ids.add(id1);
-//            log.info("User 1's reservation successful, id: " + id1);
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        } catch (BaseException baseException) {
-//            log.error("User 1 reservation failed: " + Arrays.toString(baseException.getStackTrace()));
-//        }
-//
-//        // 사용자 2의 예약 처리 (순차적으로 실행)
-//        try {
-//            long id2 = userReservationService.chairReservation(user2Email, utilizationRequest2);
-//            ids.add(id2);
-//            log.info("User 2's reservation successful, id: " + id2);
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        } catch (BaseException baseException) {
-//            log.error("User 2 reservation failed: " + Arrays.toString(baseException.getStackTrace()));
-//        }
+        //        // 사용자 1의 예약 처리
+        //        try {
+        //            long id1 = userReservationService.chairReservation(user1Email,
+        // utilizationRequest1);
+        //            ids.add(id1);
+        //            log.info("User 1's reservation successful, id: " + id1);
+        //        } catch (JsonProcessingException e) {
+        //            throw new RuntimeException(e);
+        //        } catch (BaseException baseException) {
+        //            log.error("User 1 reservation failed: " +
+        // Arrays.toString(baseException.getStackTrace()));
+        //        }
+        //
+        //        // 사용자 2의 예약 처리 (순차적으로 실행)
+        //        try {
+        //            long id2 = userReservationService.chairReservation(user2Email,
+        // utilizationRequest2);
+        //            ids.add(id2);
+        //            log.info("User 2's reservation successful, id: " + id2);
+        //        } catch (JsonProcessingException e) {
+        //            throw new RuntimeException(e);
+        //        } catch (BaseException baseException) {
+        //            log.error("User 2 reservation failed: " +
+        // Arrays.toString(baseException.getStackTrace()));
+        //        }
 
         // Then
         Assertions.assertThat(ids.size()).isEqualTo(1);

@@ -18,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.seatsence.global.code.ResponseCode;
-import project.seatsence.global.exceptions.BaseException;
 import project.seatsence.global.response.SliceResponse;
 import project.seatsence.src.store.domain.CustomUtilizationField;
 import project.seatsence.src.store.domain.Store;
@@ -391,18 +389,14 @@ public class UserReservationService {
         // 동시성처리: 의자 예약 일정 겹치는지 검사 && 일정 겹치지 않으면 예약 DB에 저장
         long savedId =
                 namedLockUserReservationFacade.chairReservation(
-                        storeChair,
-                        reservation,
-                        chairUtilizationRequest,
-                        userEmail,
-                        user);
+                        storeChair, reservation, chairUtilizationRequest, userEmail, user);
 
-//        if (savedId == -1) {
-//            System.out.println("service: 이미 예약이 존재!!!");
-//            throw new BaseException(ResponseCode.RESERVATION_ALREADY_EXIST);
-//        }
+        //        if (savedId == -1) {
+        //            System.out.println("service: 이미 예약이 존재!!!");
+        //            throw new BaseException(ResponseCode.RESERVATION_ALREADY_EXIST);
+        //        }
 
-//        inputChairCustomUtilizationContent(user, reservation, chairUtilizationRequest);
+        //        inputChairCustomUtilizationContent(user, reservation, chairUtilizationRequest);
 
         return savedId;
     }
