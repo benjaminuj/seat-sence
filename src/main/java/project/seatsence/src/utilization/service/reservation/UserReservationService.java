@@ -372,6 +372,7 @@ public class UserReservationService {
 
     public long chairReservation(String userEmail, ChairUtilizationRequest chairUtilizationRequest)
             throws JsonProcessingException {
+
         StoreChair storeChair =
                 storeChairService.findByIdAndState(chairUtilizationRequest.getStoreChairId());
         Store store = storeService.findByIdAndState(storeChair.getStoreSpace().getStore().getId());
@@ -391,15 +392,17 @@ public class UserReservationService {
         long savedId =
                 namedLockUserReservationFacade.chairReservation(
                         storeChair,
-                        chairUtilizationRequest.getStartSchedule(),
-                        chairUtilizationRequest.getEndSchedule(),
-                        reservation);
+                        reservation,
+                        chairUtilizationRequest,
+                        userEmail,
+                        user);
 
-        if (savedId == -1) {
-            throw new BaseException(ResponseCode.RESERVATION_ALREADY_EXIST);
-        }
+//        if (savedId == -1) {
+//            System.out.println("service: 이미 예약이 존재!!!");
+//            throw new BaseException(ResponseCode.RESERVATION_ALREADY_EXIST);
+//        }
 
-        inputChairCustomUtilizationContent(user, reservation, chairUtilizationRequest);
+//        inputChairCustomUtilizationContent(user, reservation, chairUtilizationRequest);
 
         return savedId;
     }
