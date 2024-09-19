@@ -2,13 +2,20 @@ spring:
   config:
     activate:
       on-profile: "test"
-  spring:
-    datasource:
-      url: jdbc:h2:mem:test
-      username: user
-      password:
-      driver-class-name: org.h2.Driver
-    jpa:
-      hibernate:
-        ddl-auto: create-drop
-      database-platform: org.hibernate.dialect.H2Dialect
+#  spring:
+#    datasource:
+#      url: jdbc:h2:mem:test
+#      username: user
+#      password:
+#      driver-class-name: org.h2.Driver
+#    jpa:
+#      hibernate:
+#        ddl-auto: create-drop
+#      database-platform: org.hibernate.dialect.H2Dialect
+
+logging:
+  level:
+    org:
+      springframework:
+        transaction:
+          interceptor: TRACE

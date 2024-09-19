@@ -13,6 +13,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import project.seatsence.global.exceptions.BaseException;
@@ -21,6 +22,7 @@ import project.seatsence.src.utilization.dto.request.CustomUtilizationContentReq
 
 @Slf4j
 @SpringBootTest
+@TestPropertySource(locations = "classpath:application-test.yml")
 class UserReservationServiceTest {
     @Autowired private UserReservationService userReservationService;
 
@@ -45,9 +47,9 @@ class UserReservationServiceTest {
             executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
     void testChairReservationConcurrency() throws InterruptedException {
         // Given
-        int numberOfThreads = 20;
+        int numberOfThreads = 2;
         ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
-        CountDownLatch latch = new CountDownLatch(2);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
         // 예약자 2명
         String user1Email = "gildong@naver.com";
@@ -88,26 +90,20 @@ class UserReservationServiceTest {
                         Arrays.asList(customUtilizationContentRequest));
 
         // When
-        // DB의 예약 데이터 id값 저장할 리스트
         List<Long> ids = new ArrayList<>();
 
         service.execute(
                 () -> {
                     long id = -1;
-                    System.out.println(
-                            "gildong@naver.com 실행 스레드: " + Thread.currentThread().getName());
 
                     try {
                         id =
                                 userReservationService.chairReservation(
                                         user1Email, utilizationRequest1);
-                        System.out.println("test까지 나옴");
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     } catch (BaseException baseException) {
-                        //
-                        // log.error(ResponseCode.RESERVATION_ALREADY_EXIST.getMessage());
-                        log.error("error!: " + Arrays.toString(baseException.getStackTrace()));
+                        log.error(baseException.getResponseCode().getMessage());
                     }
 
                     if (id != -1) {
@@ -121,20 +117,14 @@ class UserReservationServiceTest {
         service.execute(
                 () -> {
                     long id = -1;
-                    System.out.println(
-                            "minji@naver.com 실행 스레드: " + Thread.currentThread().getName());
-
                     try {
                         id =
                                 userReservationService.chairReservation(
                                         user2Email, utilizationRequest2);
-                        System.out.println("test까지 나옴");
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     } catch (BaseException baseException) {
-                        //
-                        // log.error(ResponseCode.RESERVATION_ALREADY_EXIST.getMessage());
-                        log.error("error!: " + Arrays.toString(baseException.getStackTrace()));
+                        log.error(baseException.getResponseCode().getMessage());
                     }
 
                     if (id != -1) {
@@ -145,32 +135,6 @@ class UserReservationServiceTest {
                     latch.countDown();
                 });
         latch.await();
-
-        //        // 사용자 1의 예약 처리
-        //        try {
-        //            long id1 = userReservationService.chairReservation(user1Email,
-        // utilizationRequest1);
-        //            ids.add(id1);
-        //            log.info("User 1's reservation successful, id: " + id1);
-        //        } catch (JsonProcessingException e) {
-        //            throw new RuntimeException(e);
-        //        } catch (BaseException baseException) {
-        //            log.error("User 1 reservation failed: " +
-        // Arrays.toString(baseException.getStackTrace()));
-        //        }
-        //
-        //        // 사용자 2의 예약 처리 (순차적으로 실행)
-        //        try {
-        //            long id2 = userReservationService.chairReservation(user2Email,
-        // utilizationRequest2);
-        //            ids.add(id2);
-        //            log.info("User 2's reservation successful, id: " + id2);
-        //        } catch (JsonProcessingException e) {
-        //            throw new RuntimeException(e);
-        //        } catch (BaseException baseException) {
-        //            log.error("User 2 reservation failed: " +
-        // Arrays.toString(baseException.getStackTrace()));
-        //        }
 
         // Then
         Assertions.assertThat(ids.size()).isEqualTo(1);
