@@ -76,7 +76,7 @@ $ java -jar -Dspring.profiles.active=dev build/libs/seat-sence-0.0.1-SNAPSHOT.ja
 
 # Branch to look
 
-The `dev-ben` branch, which currently has the README.md file, is the latest version, so you can check that.
+The `dev` branch, which currently has the README.md file, is the latest version, so you can check that.
 
 # Stacks
 
