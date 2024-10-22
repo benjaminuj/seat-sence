@@ -82,6 +82,9 @@ dependencies {
 
 	testCompileOnly 'org.projectlombok:lombok:1.18.22'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+	// redisson
+	implementation 'org.redisson:redisson-spring-boot-starter:3.18.0'
 }
 
 test {
