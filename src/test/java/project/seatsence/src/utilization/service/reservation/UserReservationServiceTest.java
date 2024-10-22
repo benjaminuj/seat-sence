@@ -28,6 +28,8 @@ class UserReservationServiceTest {
 
     // 의자 예약 동시성 검증 코드
     @Test
+    //    @Sql(scripts = "/sql/delete-all-test-data.sql", executionPhase =
+    // ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "/sql/user-test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "/sql/store-test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(

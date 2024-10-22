@@ -74,7 +74,13 @@ public enum ResponseCode {
     PARTICIPATION_NOT_FOUND(NOT_FOUND, "PARTICIPATION_404_001", "참여 내역을 찾을 수 없습니다."),
     INVALID_SELF_PARTICIPATION_APPLICATION(
             BAD_REQUEST, "PARTICIPATION_400_001", "신청자 본인은 참여 신청 할 수 없습니다."),
-    USER_ALREADY_APPLY(BAD_REQUEST, "PARTICIPATION_400_002", "이미 참여 신청한 유저입니다");
+    USER_ALREADY_APPLY(BAD_REQUEST, "PARTICIPATION_400_002", "이미 참여 신청한 유저입니다"),
+
+    /** LOCK error code */
+    LOCK_NOT_AVAILABLE(CONFLICT, "LOCK_409_001", "락을 획득할 수 없습니다."),
+    LOCK_INTERRUPTED_ERROR(INTERNAL_SERVER_ERROR, "LOCK_500_001", "락 획득을 시도하는 중 인터럽트가 발생했습니다."),
+    UNLOCKING_A_LOCK_WHICH_IS_NOT_LOCKED(
+            BAD_REQUEST, "LOCK_400_001", "locked 상태의 해제하려는 락이 존재하지 않습니다.");
 
     private final HttpStatus status;
     private final String code;
