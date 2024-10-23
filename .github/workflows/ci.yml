@@ -64,8 +64,8 @@ jobs:
         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
         AWS_S3_BUCKET: seatsense
         AWS_REGION: ap-northeast-2
-        spring.redis.host: localhost
-        spring.redis.port: 6379
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
       run: ./gradlew clean build --warning-mode=all --stacktrace
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
