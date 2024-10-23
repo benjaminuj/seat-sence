@@ -16,6 +16,17 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - uses: actions/checkout@v4
     
@@ -35,14 +46,7 @@ jobs:
         mysql database: 'testdb' # Optional, default value is "test". The specified database which will be create
         # mysql root password: 'root!' # Required if "mysql user" is empty, default is empty. The root superuser password
         mysql user: 'admin' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Of course you can use secrets, too
-        mysql password: 'admin!' # Required if "mysql user" exists. The password for the "mysql user"
-
-    - name: actions-setup-redis
-      # You may pin to the exact commit or the version.
-      # uses: shogo82148/actions-setup-redis@3326bceaddf2a1c3c1eaa819049d084119d0742f
-      uses: shogo82148/actions-setup-redis@v1.35.1
-      with:
-        redis-port: 6379
+        mysql password: 'admin!' # Required if "mysql user" exists. The password for the "mysql user
 
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
