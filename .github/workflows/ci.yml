@@ -37,8 +37,13 @@ jobs:
         mysql user: 'admin' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Of course you can use secrets, too
         mysql password: 'admin!' # Required if "mysql user" exists. The password for the "mysql user"
 
-    - name: Start Redis
-      run: sudo apt-get install redis-server && sudo systemctl start redis-server
+    - name: actions-setup-redis
+      # You may pin to the exact commit or the version.
+      # uses: shogo82148/actions-setup-redis@3326bceaddf2a1c3c1eaa819049d084119d0742f
+      uses: shogo82148/actions-setup-redis@v1.35.1
+      with:
+        redis-version: '7.2.6'
+        redis-port: 6379
 
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
