@@ -42,7 +42,6 @@ jobs:
       # uses: shogo82148/actions-setup-redis@3326bceaddf2a1c3c1eaa819049d084119d0742f
       uses: shogo82148/actions-setup-redis@v1.35.1
       with:
-        redis-version: '7.2.6'
         redis-port: 6379
 
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
